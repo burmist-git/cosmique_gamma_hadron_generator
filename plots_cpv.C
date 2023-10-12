@@ -2,7 +2,7 @@ Int_t plots_cpv(){
   
   TString fileN;
   TString objectName;
-  fileN = "./hist_cosmique_gamma_hadron_generator.root";
+  fileN = "./hist.root";
   TFile *f1 = new TFile(fileN.Data());
 
   TGraph2D *gr2D_sphere = (TGraph2D*)f1->Get("gr2D_sphere");

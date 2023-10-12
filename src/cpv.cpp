@@ -39,14 +39,21 @@ void cpv::Loop(TString histOut){
   gr2D_sphere->SetNameTitle("gr2D_sphere","gr2D_sphere");
   TGraph2D *gr2D_gen = new TGraph2D();
   gr2D_gen->SetNameTitle("gr2D_gen","gr2D_gen");
-
+  //
+  TH1D *h1_theta = new TH1D("h1_theta","h1_theta",1000,0.0,2*TMath::Pi());
+  TH1D *h1_phi = new TH1D("h1_phi","h1_phi",1000,0.0,2*TMath::Pi());
+  TH1D *h1_theta_deg = new TH1D("h1_theta_deg","h1_theta_deg",10000,0.0,181.0);
+  TH1D *h1_phi_deg = new TH1D("h1_phi_deg","h1_phi_deg",1000,0.0,360.0);
+  //
+  Double_t theta_deg;
+  Double_t phi_deg;
   //
   Long64_t nentries = fChain->GetEntriesFast();
   cout<<"nentries = "<<nentries<<endl;
   Long64_t nbytes = 0, nb = 0;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
     Long64_t ientry = LoadTree(jentry);
-    if(jentry%1000 == 0)
+    if(jentry%100000 == 0)
       cout<<jentry<<endl;
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
@@ -54,8 +61,17 @@ void cpv::Loop(TString histOut){
     gr2D_int1->SetPoint(gr2D_int1->GetN(),x1_int,y1_int,z1_int);
     //
     gr2D_gen->SetPoint(gr2D_gen->GetN(),x0,y0,z0);
+    //
+    theta_deg = theta*180.0/TMath::Pi();
+    phi_deg = phi*180.0/TMath::Pi();
+    //
+    h1_theta->Fill(theta);
+    h1_phi->Fill(phi);
+    //
+    h1_theta_deg->Fill(theta_deg);
+    h1_phi_deg->Fill(phi_deg);
   }
-
+  //
   Double_t thetaE;
   Double_t costhetaE;
   Double_t phiE;
@@ -256,6 +272,13 @@ void cpv::Loop(TString histOut){
   gr2D_int1->Write();
   gr2D_sphere->Write();
   gr2D_gen->Write();
+  //
+  h1_theta->Write();
+  h1_phi->Write();
+  //
+  h1_theta_deg->Write();
+  h1_phi_deg->Write();
+  //
   //gr2D_sphere3->Write();
   /*
   gr2D_sphere->Write();

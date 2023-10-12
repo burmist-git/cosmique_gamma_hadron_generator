@@ -4,14 +4,12 @@
 #source /opt/ebsofts/ROOT/6.20.04-foss-2019b-Python-3.7.4/bin/thisroot.sh
 
 #Analyse list of root files 
-rootFilesList="./rootFileList.dat"
+rootFilesList="./rootFile.list"
 outHistF="./hist.root"
-#rootFilesList="./rootFileList_short.dat"
-#outHistF="./hist_short.root"
 
 #Or analyse single root file 
-inRootFiles="./cosmique_gamma_hadron_generator.root"
-outHistSingleF="./hist_cosmique_gamma_hadron_generator.root"
+inRootFiles="../scratch/cosmique_gamma_hadron_generator/out/00010/cosmique_gamma_hadron_generator.root"
+outHistSingleF="./hist_one.root"
 
 make -f Makefilecpv clean; make -f Makefilecpv runcpv;
 
