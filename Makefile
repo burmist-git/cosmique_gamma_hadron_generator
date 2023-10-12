@@ -27,12 +27,8 @@ printmakehelp_and_reminder: cosmique_gamma_hadron_generator.C Makefileterzina
 cosmique_gamma_hadron_generator: cosmique_gamma_hadron_generator.C
 	$(CXX) -o $@ $^ $(ROOTCFLAGS) $(ROOTLIBS) $(ROOTGLIBS)
 
-mergeDATfiles: mergeDATfiles.C
-	$(CXX) -o $@ $^ $(ROOTCFLAGS) $(ROOTLIBS) $(ROOTGLIBS)
-
 clean:
 	rm -rf cosmique_gamma_hadron_generator
-	rm -rf mergeDATfiles
 	rm -rf *~
 	rm -rf src/*~
 	rm -rf $(OUTLIB)*.o

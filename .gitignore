@@ -3,3 +3,5 @@
 *.eps
 obj
 *.root
+cosmique_gamma_hadron_generator
+runcpv
