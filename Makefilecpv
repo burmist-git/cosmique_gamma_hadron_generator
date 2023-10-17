@@ -18,7 +18,7 @@ all: makedir runcpv
 makedir:
 	mkdir -p $(OUTLIB);
 
-runcpv: runcpv.cpp obj/cpv.o obj/cpvbase.o
+runcpv: runcpv.cpp obj/cpv.o obj/cpvbase.o obj/evstHist.o
 	$(CXX) -o runcpv runcpv.cpp $(OUTLIB)*.o $(ROOTCFLAGS) $(ROOTLIBS) $(ROOTGLIBS)
 
 obj/cpv.o: src/cpv.cpp src/cpv.hh obj/cpvbase.o
@@ -26,6 +26,9 @@ obj/cpv.o: src/cpv.cpp src/cpv.hh obj/cpvbase.o
 
 obj/cpvbase.o: src/cpvbase.cpp src/cpvbase.hh
 	$(CXX) $(CXXFLAGS) -c -I. -o $(OUTLIB)cpvbase.o $<
+
+obj/evstHist.o: src/evstHist.cpp src/evstHist.hh
+	$(CXX) $(CXXFLAGS) -c -I. -o $(OUTLIB)evstHist.o $<
 
 clean:
 	rm -f runcpv

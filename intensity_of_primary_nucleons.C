@@ -19,7 +19,7 @@ void get_flux_p_PDG(TGraph *gr, TString name_dat_file);
 Double_t cpf(Double_t *x, Double_t *par){
   Double_t A  = par[0];
   Double_t B  = par[1];
-  Double_t C  = par[2];
+  Double_t C  = 0.0;
   Double_t val = A/(TMath::Power(x[0],B)) + C;
   return val;
 }
@@ -32,8 +32,8 @@ Int_t intensity_of_primary_nucleons(){
   Double_t I[n];
   Double_t etot[n];
   //
-  Double_t etot_min = 5;      //in GeV (5 GeV)
-  Double_t etot_max = 300000; //in GeV (100 TeV)
+  Double_t etot_min = 1;      //in GeV (5 GeV)
+  Double_t etot_max = 1000000; //in GeV (100 TeV)
   //
   Double_t N = 1;
   //
@@ -52,7 +52,10 @@ Int_t intensity_of_primary_nucleons(){
   //
   TGraph *gr_flux_p_PDG = new TGraph();
   gr_flux_p_PDG->SetNameTitle("gr_flux_p_PDG","gr_flux_p_PDG");  
-  //  
+  //
+  TGraphErrors *gr_diff_DAMPE_fit_p_PDG = new TGraphErrors();
+  gr_diff_DAMPE_fit_p_PDG->SetNameTitle("gr_diff_DAMPE_fit_p_PDG","gr_diff_DAMPE_fit_p_PDG");
+  //
   for(Int_t i = 0;i<n;i++){
     etot[i] = etot_min + (etot_max - etot_min)/(n - 1)*i;
     I[i] = get_intensity_of_primary_nucleons(etot[i], N);
@@ -81,7 +84,6 @@ Int_t intensity_of_primary_nucleons(){
     ff = get_intensity_of_primary_nucleons(ee, N);
     gr_diff_PDG_par->SetPoint(i,ee,(ff - ff_d)/ff_d);
   }
-
   //  
   TCanvas *c1 = new TCanvas("c1",fileN.Data(),10,10,1200,600);
   c1->Divide(2,1);
@@ -133,7 +135,7 @@ Int_t intensity_of_primary_nucleons(){
   
   //
   mg->GetXaxis()->SetTitle("E, GeV");
-  mg->GetYaxis()->SetTitle("dN/dE, m^{-2} sr^{-1} GeV^{-1}");
+  mg->GetYaxis()->SetTitle("dN/dE, m^{-2} s^{-1} sr^{-1} GeV^{-1}");
   //
   c1->cd(2);
   gPad->SetGridx();
@@ -174,13 +176,15 @@ Int_t intensity_of_primary_nucleons(){
   //
   //
 
-  /*
-  TCanvas *c2 = new TCanvas("c2",fileN.Data(),10,10,600,600);
+  TCanvas *c2 = new TCanvas("c2",fileN.Data(),10,10,1200,600);
+  c2->Divide(2,1);
   gStyle->SetPalette(1);
   gStyle->SetFrameBorderMode(0);
   gROOT->ForceStyle();
   gStyle->SetStatColor(kWhite);
   gStyle->SetOptStat(kFALSE);
+  //
+  c2->cd(1);
   //
   gPad->SetGridx();
   gPad->SetGridy();
@@ -190,7 +194,7 @@ Int_t intensity_of_primary_nucleons(){
 
   //Fit
   //
-  const Int_t npar = 3;
+  const Int_t npar = 2;
   Double_t inParameters[npar];
   Double_t e_min  = etot_min;
   Double_t e_max  = etot_max;
@@ -201,24 +205,70 @@ Int_t intensity_of_primary_nucleons(){
   //inParameters[0] = f_max*TMath::Power(e_min,inParameters[1]);
   //inParameters[3] = 0.0;
   //
-  inParameters[0] = 1.8e+04;
-  inParameters[1] = 2.70;
-  inParameters[2] = 0.0;
+  //inParameters[0] = 1.8e+04;
+  //inParameters[1] = 2.70;
+  //inParameters[2] = 0.0;
+  //
+  //inParameters[0] = 8.98902e+03;
+  //inParameters[1] = 2.66195e+00;
+  //inParameters[2] = -1.91206e-10;
+  //inParameters[2] = 0.0;
+  inParameters[0] = 9.67854e+03;
+  //inParameters[1] = 2.67400e+00;
+  inParameters[1] = 2674.0/1000.0;
   //
   TF1 *f_cpf = new TF1( "f_cpf", cpf, e_min, e_max, npar);
   f_cpf->SetParameters(inParameters);
   f_cpf->SetParName(0, "A");
   f_cpf->SetParName(1, "B");
-  f_cpf->SetParName(2, "C");
+  //f_cpf->SetParName(2, "C");
   //f_cpf->FixParameter(0,inParameters[0]);
   //f_cpf->FixParameter(1,inParameters[1]);
   //f_cpf->FixParameter(2,inParameters[2]);
   gr_DAMPE->Fit("f_cpf","","",e_min, e_max);
   ///////////////////
-  gr_DAMPE->SetTitle("Flux(E) = A/E^{B} + C");
-  gr_DAMPE->Draw("APL");
-  gr_DAMPE->GetXaxis()->SetTitle("E, GeV");
-  gr_DAMPE->GetYaxis()->SetTitle("dN/dE, m^{-2} sr^{-1} GeV^{-1}");
+  gr_DAMPE->SetTitle("Flux(E) = A/E^{B}");
+  //gr_DAMPE->Draw("APL");
+  //gr_DAMPE->GetXaxis()->SetTitle("E, GeV");
+  //gr_DAMPE->GetYaxis()->SetTitle("dN/dE, m^{-2} s^{-1} sr^{-1} GeV^{-1}");
+  //gr_flux_p_PDG->Draw("same APL");
+  //
+  TMultiGraph *mg3 = new TMultiGraph();
+  mg3->SetTitle("Flux(E) = A/E^{B}");
+  mg3->Add(gr_DAMPE);
+  mg3->Add(gr_flux_p_PDG);
+  mg3->Draw("APL");
+  //
+  mg3->GetXaxis()->SetTitle("E, GeV");
+  mg3->GetYaxis()->SetTitle("dN/dE, m^{-2} s^{-1} sr^{-1} GeV^{-1}");
+  //
+  TLegend *leg3 = new TLegend(0.6,0.6,0.9,0.9,"","brNDC");
+  leg3->AddEntry(gr_DAMPE, "DAMPE", "apl");
+  leg3->AddEntry(gr_flux_p_PDG, "PDG", "apl");
+  leg3->Draw();
+
+  c2->cd(2);
+  //
+  gPad->SetGridx();
+  gPad->SetGridy();
+  gPad->SetLogx();
+  //gPad->SetLogy();
+  //
+  for(Int_t i = 0;i<gr_flux_p_PDG->GetN();i++){
+    gr_flux_p_PDG->GetPoint(i,ee,ff_d);
+    ff = f_cpf->Eval(ee);
+    gr_diff_DAMPE_fit_p_PDG->SetPoint(i,ee,TMath::Abs((ff - ff_d)/ff_d));
+  }
+  //
+  gr_diff_DAMPE_fit_p_PDG->SetMarkerStyle(1);
+  gr_diff_DAMPE_fit_p_PDG->SetLineWidth(2);
+  gr_diff_DAMPE_fit_p_PDG->SetMarkerColor(kBlack);
+  gr_diff_DAMPE_fit_p_PDG->SetTitle("");
+  gr_diff_DAMPE_fit_p_PDG->Draw();
+  gr_diff_DAMPE_fit_p_PDG->GetYaxis()->SetTitle("Relative difference");
+  gr_diff_DAMPE_fit_p_PDG->GetXaxis()->SetTitle("E, GeV");
+  
+  //
   //
   //  
   //for(i = 0;i<nChannels;i++){
@@ -247,7 +297,7 @@ Int_t intensity_of_primary_nucleons(){
   //h1_1->GetXaxis()->SetTitle("Photon density, 1/m^2");
   //h1_1->GetXaxis()->SetRangeUser(50.0,90.0);
   //h1_1->GetXaxis()->SetRangeUser(250.0,290.0);
-  */
+
   return 0;
 }
 
