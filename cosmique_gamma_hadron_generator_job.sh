@@ -38,5 +38,3 @@ else
         printHelp
     fi
 fi
-
-

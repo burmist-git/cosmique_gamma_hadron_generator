@@ -27,12 +27,14 @@ using namespace std;
 ////
 const Double_t earthR = 6371;                             // km
 const Double_t earthD = earthR*2;                         // km
-const Double_t generationH = 200;                         // km
+const Double_t generationH = 1;                           // km
+//const Double_t generationH = 200;                           // km
 const Double_t generationH_from_c = earthR + generationH; // km
 const Double_t track_speed = TMath::C()/1000;             // km/s
 
 //
-const Double_t cos_min_generation = TMath::Cos(15.0/180.0*TMath::Pi());
+const Double_t cos_min_generation = TMath::Cos(3.0/180.0*TMath::Pi());
+//const Double_t cos_min_generation = TMath::Cos(15.0/180.0*TMath::Pi());
 
 const Double_t x0_LST01 = -70.93/1000.0;                  //km
 const Double_t y0_LST01 = -52.07/1000.0;                  //km

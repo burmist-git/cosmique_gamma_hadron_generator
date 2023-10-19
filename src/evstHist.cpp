@@ -46,6 +46,9 @@ evstHist::evstHist(const char* name, const char* title,
 		   Double_t val_Thetamin, Double_t val_Thetamax, Int_t val_N_bins_t) : TH2Poly()
 {    
   //
+  _hist_name = name;
+  _hist_title = title;
+  //
   SetName(name);
   SetTitle(title);
   //
@@ -72,10 +75,18 @@ evstHist::evstHist(const char* name, const char* title,
     _Eminarr[i] = TMath::Power(10,E_log_l);
     _Emaxarr[i] = TMath::Power(10,E_log_r); 
     E_bins[i] = _Eminarr[i];
-    cout<<E_bins[i]<<endl;
+    //cout<<E_bins[i]<<endl;
   }
   E_bins[_N_bins_E] = _Emax;
-  _h1_E = new TH1D("_h1_E","_h1_E", _N_bins_E, E_bins);
+  //
+  TString namehist=name;
+  TString nametitle=title;
+  //  
+  TString namehist_E="_h1_E_";
+  namehist_E += namehist;
+  TString nametitle_E="_h1_E_";
+  nametitle_E +=nametitle;
+  _h1_E = new TH1D(namehist_E.Data(),nametitle_E.Data(), _N_bins_E, E_bins);
   //  
   //_Thetamin = 0.0;  //deg
   //_Thetamax = 10.0; //deg
@@ -85,7 +96,11 @@ evstHist::evstHist(const char* name, const char* title,
   _Thetamax = val_Thetamax;
   _N_bins_t = val_N_bins_t;
   //
-  _h1_theta = new TH1D("_h1_theta","_h1_theta", _N_bins_t, _Thetamin, _Thetamax);
+  TString namehist_theta="_h1_theta_";
+  namehist_theta += namehist;
+  TString nametitle_theta="_h1_theta_";
+  nametitle_theta +=nametitle;
+  _h1_theta = new TH1D(namehist_theta.Data(),nametitle_theta.Data(), _N_bins_t, _Thetamin, _Thetamax);
   //
   _Thetaminarr = new Double_t[_N_bins_t];
   _Thetamaxarr = new Double_t[_N_bins_t];
@@ -132,7 +147,7 @@ void evstHist::test(){
     SetBinContent(i+1,i+1);
 };
 
-void evstHist::Draw_hist(TString fileName){
+TCanvas* evstHist::Draw_hist(TString fileName){
 
   //kDeepSea=51,          kGreyScale=52,    kDarkBodyRadiator=53,
   //kBlueYellow= 54,      kRainBow=55,      kInvertedDarkBodyRadiator=56,
@@ -156,9 +171,15 @@ void evstHist::Draw_hist(TString fileName){
   //kWaterMelon=108,      kCool=109,        kCopper=110,
   //kGistEarth=111,       kViridis=112,     kCividis=113
 
-  gStyle->SetPalette(kInvertedDarkBodyRadiator);
+  //gStyle->SetPalette(kInvertedDarkBodyRadiator);
 
-  TCanvas *c1 = new TCanvas("c1","c1",1000,1000);
+  //
+  TString c1_name = "c1_";
+  c1_name += _hist_name;
+  TString c1_title = "c1_";
+  c1_title += _hist_title;
+  //
+  TCanvas *c1 = new TCanvas(c1_name.Data(),c1_title.Data(),1500,1000);
   c1->SetRightMargin(0.12);
   c1->SetLeftMargin(0.12);
   c1->SetTopMargin(0.1);
@@ -167,25 +188,59 @@ void evstHist::Draw_hist(TString fileName){
   c1->SetLogz();
   
   TH2F *frame = new TH2F("h2","h2", 40, _Thetamin, _Thetamax, 40, _Emin, _Emax);
-  frame->SetTitle("");
-  //frame->GetXaxis()->SetTitle("x (mm)");
-  //frame->GetYaxis()->SetTitle("y (mm)");
+  frame->SetTitle("Proton rate, Hz");
+  frame->GetXaxis()->SetTitle("Theta, deg");
+  frame->GetYaxis()->SetTitle("Energy, GeV");
   //frame->GetXaxis()->CenterTitle();
   //frame->GetYaxis()->CenterTitle();
   //frame->GetYaxis()->SetTitleOffset(1.5);
   frame->SetStats(kFALSE);
   frame->Draw();
-
+  //
   //SetMaximum(50);
   //SetMinimum(0);
-
-  SetMarkerSize(0.6);
-  
-  //Draw("same TEXT");
+  //
+  SetMarkerSize(0.8);
   Draw("same ZCOLOR TEXT");
+  //Draw("same TEXT");
   //Draw("same ZCOLOR");
   //c1->SaveAs("Draw_map_test.pdf");
+  if(fileName != "")
   c1->SaveAs(fileName.Data());
+  return c1;
 }
 
+void evstHist::Divide(evstHist *evH_cut, evstHist *evH_all){
+  Double_t nev;
+  Double_t nev_norm;
+  for(Int_t i = 1;i<=GetNcells();i++){
+    nev=evH_cut->GetBinContent(i);
+    nev_norm=evH_all->GetBinContent(i);
+    if(nev_norm != 0.0)
+      SetBinContent(i,nev/nev_norm);
+    else
+      SetBinContent(i,0.0);
+  }
+}
 
+void evstHist::DumpBinContent(TString data_out){
+  ofstream myfile;
+  myfile.open (data_out.Data());
+  for(Int_t i = 1;i<=GetNcells();i++){
+    myfile<<setprecision(20)<<GetBinContent(i)<<endl;
+  }
+  myfile.close();
+}
+
+void evstHist::LoadBinContent(TString data_in){
+  ifstream myfile(data_in.Data());
+  Double_t val;
+  Int_t i = 1;
+  if (myfile.is_open()) {
+    while (myfile>>val){
+      SetBinContent(i,val);
+      i++;
+    }
+    myfile.close();
+  }
+}

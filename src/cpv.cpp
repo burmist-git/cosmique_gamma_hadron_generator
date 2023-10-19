@@ -145,22 +145,31 @@ void cpv::Loop(TString histOut){
     //azimuth_deg = v_prot_azimuth_alt_inv.Phi()*180/TMath::Pi();
     azimuth_deg = phi*180/TMath::Pi();
     altitude_deg = 90.0 - v_prot_azimuth_alt_inv.Theta()*180/TMath::Pi();
-    if(theta_p_t_deg<=10.0){
-      h1_theta_deg_cut->Fill(theta_deg);
-      h1_phi_deg_cut->Fill(phi_deg);
-      h1_x0_cut->Fill(x0);
-      h1_y0_cut->Fill(y0);
-      h1_z0_cut->Fill(z0);
-      //
-      h1_x1_int_cut->Fill(x1_int);
-      h1_y1_int_cut->Fill(y1_int);
-      //
-      h2_y1_int_vs_x1_int_cut->Fill(x1_int,y1_int);
-      //
-      h1_azimuth_deg->Fill(azimuth_deg);
-      h1_altitude_deg->Fill(altitude_deg);
-      //
-      h1_theta_p_t_deg_cut->Fill(theta_p_t_deg);
+    ///////////
+    //
+    Double_t x0_LST01 = -70.93/1000.0;
+    Double_t y0_LST01 = -52.07/1000.0;
+    Double_t r_from_tel = TMath::Sqrt((x0_LST01 - x1_int)*(x0_LST01 - x1_int) + (y0_LST01 - y1_int)*(y0_LST01 - y1_int));
+    //
+    ///////////
+    if(theta_p_t_deg<2.0){
+      if(r_from_tel<=1.5){
+	h1_theta_deg_cut->Fill(theta_deg);
+	h1_phi_deg_cut->Fill(phi_deg);
+	h1_x0_cut->Fill(x0);
+	h1_y0_cut->Fill(y0);
+	h1_z0_cut->Fill(z0);
+	//
+	h1_x1_int_cut->Fill(x1_int);
+	h1_y1_int_cut->Fill(y1_int);
+	//
+	h2_y1_int_vs_x1_int_cut->Fill(x1_int,y1_int);
+	//
+	h1_azimuth_deg->Fill(azimuth_deg);
+	h1_altitude_deg->Fill(altitude_deg);
+	//
+	h1_theta_p_t_deg_cut->Fill(theta_p_t_deg);
+      }
     }
   }
   //
@@ -184,13 +193,23 @@ void cpv::Loop(TString histOut){
   const Double_t generationH = 200000;                      // m
   const Double_t generationH_from_c = earthR + generationH; // m
   const Double_t theta_generation = 15.0/180.0*TMath::Pi();
+  const Double_t ellipse_A_r = 1732.1;
+  const Double_t ellipse_B_r = 1500.0;
+  const Double_t effective_area = TMath::Pi()*ellipse_A_r*ellipse_B_r;
   Double_t surfaceTotal = get_surface_fluxs(generationH_from_c, theta_generation);
-  cout<<"surfaceTotal "<<surfaceTotal<<endl;  
+  cout<<"surfaceTotal   "<<surfaceTotal<<endl
+      <<"Ntot           "<<Ntot<<endl
+      <<"effective_area "<<effective_area<<endl;
   //
   //
   Int_t i_cell;
+  Double_t e_min_integral;
+  Double_t e_max_integral;
+  Double_t tot_flux_dE_perM2_perS_perSR;
+  Double_t tot_flux_in_the_acceptance;
+  Double_t acceptance;
   for(Int_t i_theta = 0;i_theta<val_N_bins_t;i_theta++){
-    cout<<evH->get_theta_hist()->GetBinLowEdge(i_theta+1)<<endl;
+    //cout<<evH->get_theta_hist()->GetBinLowEdge(i_theta+1)<<endl;
     for(Int_t i_E = 0;i_E<val_N_bins_E;i_E++){
       i_cell = (i_E)*val_N_bins_t+(i_theta+1);
       //
@@ -199,8 +218,15 @@ void cpv::Loop(TString histOut){
       //cout<<evH->get_theta_hist()->GetBinLowEdge(i_theta+1)<<endl;
       //
       nev_theta = h1_theta_p_t_deg_cut->GetBinContent(i_theta+1);
-      evH->SetBinContent(i_cell,nev_theta/Ntot*surfaceTotal*get_tot_flux(evH->get_E_hist()->GetBinLowEdge(i_E+1),
-					       (evH->get_E_hist()->GetBinLowEdge(i_E+1) + evH->get_E_hist()->GetBinWidth(i_E+1))));
+      acceptance = nev_theta/Ntot;
+      //
+      e_min_integral = evH->get_E_hist()->GetBinLowEdge(i_E+1);
+      e_max_integral = evH->get_E_hist()->GetBinLowEdge(i_E+1) + evH->get_E_hist()->GetBinWidth(i_E+1);
+      cout<<e_min_integral<<" "<<e_max_integral<<endl;
+      tot_flux_dE_perM2_perS_perSR = get_tot_flux(e_min_integral,e_max_integral);
+      tot_flux_in_the_acceptance = surfaceTotal*tot_flux_dE_perM2_perS_perSR*4*TMath::Pi()*acceptance;
+      //
+      evH->SetBinContent(i_cell,tot_flux_in_the_acceptance);
     }
   }
   //for(Int_t i = 1;i<=evH->GetNcells();i++){
@@ -209,11 +235,10 @@ void cpv::Loop(TString histOut){
   //}
   //evH->test();
   ////////
-  evH->SetMaximum(1.0e+10);
-  evH->SetMinimum(1.0e-2);
+  evH->SetMaximum(1.0e+9);
+  evH->SetMinimum(1.0e-1);
   evH->Draw_hist("evH.pdf");
-
-  
+  //evH->
   //
   TFile* rootFile = new TFile(histOut.Data(), "RECREATE", " Histograms", 1);
   rootFile->cd();
@@ -261,6 +286,8 @@ void cpv::Loop(TString histOut){
   h1_theta_p_t_deg_cut->Write();
   //
   evH->Write();
+  evH->Draw_hist("")->Write();
+  evH->DumpBinContent("flux.dat");
   rootFile->Close();
 }
 

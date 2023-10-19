@@ -1,5 +1,25 @@
-#rm cosmique_proton_generator
-#make Makefile cosmique_proton_generator
-source /home/dpncguest/home2/root_v6.18.04_git/root-install/bin/thisroot.sh
-time $1 $2 $3 $4 $5 $6
-#time /home/dpncguest/home2/work/POEMMA/geant4/cosmique_proton_generator/cosmique_proton_generator 0 1000000000 /home/dpncguest/home2/work/POEMMA/geant4/cosmique_proton_generator/data/cosmique_proton_generator_01screen.root 1231231 1
+#!/bin/sh
+
+function printHelp {
+    echo " --> ERROR in input arguments "
+    echo " [0] -d    : default"
+    echo " [0] -h    : print help"
+}
+
+if [ $# -eq 0 ]
+then
+    printHelp
+else
+    if [ "$1" = "-d" ]; then
+        rnd_seed=`date +%N`
+	nev=100000000
+	statisticsMultiplyFactor=10
+	cmd="./cosmique_gamma_hadron_generator 0 $nev cosmique_gamma_hadron_generator_h200km.root $rnd_seed $statisticsMultiplyFactor"
+        #echo $cmd
+        $cmd
+    elif [ "$1" = "-h" ]; then
+        printHelp
+    else
+        printHelp
+    fi
+fi
