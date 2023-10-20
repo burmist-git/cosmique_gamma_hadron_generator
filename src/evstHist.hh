@@ -24,15 +24,18 @@ class evstHist: public TH2Poly {
   void test();
   TCanvas* Draw_hist(TString fileName);
 
-  inline const TH1D* get_theta_hist() const {return _h1_theta;}
-  inline const TH1D* get_E_hist() const {return _h1_E;}
+  inline TH1D* get_theta_hist() {return _h1_theta;}
+  inline TH1D* get_E_hist() {return _h1_E;}
 
   TString _hist_name;
   TString _hist_title;
 
   void Divide(evstHist *evH_cut, evstHist *evH_all);
+  void Multiply(evstHist *evH_eff, evstHist *evH_flux);
   void DumpBinContent(TString data_out);
   void LoadBinContent(TString data_in);
+
+  static const void PrintBinsInfo(const TH1D *h1);
   
  private:
 

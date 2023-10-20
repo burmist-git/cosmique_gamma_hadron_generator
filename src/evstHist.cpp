@@ -223,6 +223,16 @@ void evstHist::Divide(evstHist *evH_cut, evstHist *evH_all){
   }
 }
 
+void evstHist::Multiply(evstHist *evH_eff, evstHist *evH_flux){
+  Double_t nev;
+  Double_t nev_norm;
+  for(Int_t i = 1;i<=GetNcells();i++){
+    nev=evH_eff->GetBinContent(i);
+    nev_norm=evH_flux->GetBinContent(i);
+    SetBinContent(i,nev*nev_norm);
+  }
+}
+
 void evstHist::DumpBinContent(TString data_out){
   ofstream myfile;
   myfile.open (data_out.Data());
@@ -242,5 +252,17 @@ void evstHist::LoadBinContent(TString data_in){
       i++;
     }
     myfile.close();
+  }
+}
+
+const void evstHist::PrintBinsInfo(const TH1D *h1){
+  Double_t bin_l;
+  Double_t bin_r;
+  std::cout<<"Name  : "<<h1->GetName()<<std::endl
+	   <<"Title : "<<h1->GetTitle()<<std::endl;
+  for(Int_t i = 1; i<=h1->GetNbinsX();i++){
+    bin_l = h1->GetBinLowEdge(i);
+    bin_r = h1->GetBinLowEdge(i) + h1->GetBinWidth(i);
+    std::cout<<bin_l<<"   "<<bin_r<<std::endl;
   }
 }

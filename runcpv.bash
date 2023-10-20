@@ -4,8 +4,8 @@
 #source /opt/ebsofts/ROOT/6.20.04-foss-2019b-Python-3.7.4/bin/thisroot.sh
 
 #Analyse list of root files 
-rootFilesList="./rootFile.list"
-outHistF="./hist.root"
+rootFilesList="./rootFile1km.list"
+outHistF="./hist1km.root"
 
 #Or analyse single root file 
 inRootFiles="../scratch/cosmique_gamma_hadron_generator/out/00010/cosmique_gamma_hadron_generator.root"

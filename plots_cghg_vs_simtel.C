@@ -13,8 +13,10 @@ Int_t plots_cghg_vs_simtel(){
 
   TString fileN01;
   TString fileN02;
-  fileN01 = "./hist.root";
-  fileN02 = "../pyeventio_example/hist_fast_proton_nsb_1x_33837ev.root";
+  //fileN01 = "./hist.root";
+  fileN01 = "./hist1km.root";
+  //fileN02 = "../pyeventio_example/hist_fast_proton_nsb_1x_33837ev.root";
+  fileN02 = "../pyeventio_example/hist_fast_proton_nsb_1x.root";
   TFile *f01 = new TFile(fileN01.Data());
   TFile *f02 = new TFile(fileN02.Data());
   //
