@@ -25,7 +25,7 @@ else
             mkdir -p $job_out
             rnd_seed=`date +%N`
 	    nev=1000000000
-	    statisticsMultiplyFactor=10
+	    statisticsMultiplyFactor=1
 	    cmd="/home/users/b/burmistr/cosmique_gamma_hadron_generator/cosmique_gamma_hadron_generator 0 $nev $job_out/cosmique_gamma_hadron_generator.root $rnd_seed $statisticsMultiplyFactor"
             #echo $cmd
             $cmd
