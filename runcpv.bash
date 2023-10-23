@@ -8,8 +8,8 @@ rootFilesList="./rootFile1km.list"
 outHistF="./hist1km.root"
 
 #Or analyse single root file 
-inRootFiles="../scratch/cosmique_gamma_hadron_generator/out/00010/cosmique_gamma_hadron_generator.root"
-outHistSingleF="./hist_one.root"
+inRootFiles="./cosmique_gamma_hadron_generator_corsika.root"
+outHistSingleF="./hist_corsika.root"
 
 make -f Makefilecpv clean; make -f Makefilecpv runcpv;
 

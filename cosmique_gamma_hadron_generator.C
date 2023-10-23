@@ -27,8 +27,9 @@ using namespace std;
 ////
 const Double_t earthR = 6371;                             // km
 const Double_t earthD = earthR*2;                         // km
-const Double_t generationH = 1;                           // km
-//const Double_t generationH = 200;                           // km
+//const Double_t generationH = 1;                         // km
+const Double_t generationH = 120;                         // km
+//const Double_t generationH = 200;                       // km
 const Double_t generationH_from_c = earthR + generationH; // km
 const Double_t track_speed = TMath::C()/1000;             // km/s
 
@@ -41,9 +42,13 @@ const Double_t y0_LST01 = -52.07/1000.0;                  //km
 const Double_t z0_LST01 = earthR;                         //km
 ////
 const TVector3 LST_01_r0(x0_LST01,y0_LST01,z0_LST01);
-const TVector3 LST_01_n0(0.0,TMath::Sin(20.0/180.0*TMath::Pi()),TMath::Cos(20.0/180.0*TMath::Pi()));
+const TVector3 LST_01_n0(TMath::Sin(20.0/180.0*TMath::Pi()),0.0,TMath::Cos(20.0/180.0*TMath::Pi()));
 ////
-void genTrk(Double_t &x0, Double_t &y0, Double_t &z0, Double_t &vx, Double_t &vy, Double_t &vz, Double_t &theta, Double_t &phi, TRandom3 *rnd);
+bool gen_uniform_filled_circle_2D(Double_t &x0_in, Double_t &y0_in, Double_t r_spread, TRandom3 *rnd);
+void genTrk_corsika(Double_t &x0, Double_t &y0, Double_t &z0, Double_t &vx, Double_t &vy, Double_t &vz, Double_t &theta, Double_t &phi,
+		    TRandom3 *rnd, Double_t r_spread, Double_t theta_spread, TVector3 *R0, TVector3 *n0);
+void genTrk(Double_t &x0, Double_t &y0, Double_t &z0, Double_t &vx, Double_t &vy, Double_t &vz, Double_t &theta, Double_t &phi,
+	    TRandom3 *rnd);
 Int_t getIntersection(Double_t &x1_int, Double_t &y1_int, Double_t &z1_int, Double_t &t1_int,
 		      Double_t &x2_int, Double_t &y2_int, Double_t &z2_int, Double_t &t2_int,
 		      Double_t x0, Double_t y0, Double_t z0, Double_t vx, Double_t vy, Double_t vz);
@@ -68,6 +73,15 @@ int main(int argc, char *argv[]){
     //
     Double_t ellipse_A = 1732.1/1000.0;
     Double_t ellipse_B = 1500.0/1000.0;
+    //
+    Double_t  theta_spread_corsika = 15.0/180.0*TMath::Pi();
+    Double_t  r_spread_corsika = 1.500 + TMath::Tan(theta_spread_corsika)*generationH;
+    TVector3  v_generationH;
+    v_generationH.SetMagThetaPhi( generationH, LST_01_n0.Theta(), LST_01_n0.Phi());
+    TVector3 *R0_corsika = new TVector3( v_generationH.X(), v_generationH.Y(), v_generationH.Z()+earthR);
+    TVector3 *n0_corsika = new TVector3( LST_01_n0.x(), LST_01_n0.y(), LST_01_n0.z());    
+    //
+    cout<<"r_spread_corsika  "<<r_spread_corsika<<endl;
     //
     TRandom3 *rnd = new TRandom3(randomSeed);
     //
@@ -114,7 +128,9 @@ int main(int argc, char *argv[]){
     //
     for(Int_t j = 0;j<statisticsMultiplyFactor;j++){
       for(Int_t i = 0;i<nEvents;i++){
-	genTrk( x0, y0, z0, vx, vy, vz, theta, phi,rnd);
+	//genTrk( x0, y0, z0, vx, vy, vz, theta, phi,rnd);
+	genTrk_corsika(x0, y0, z0, vx, vy, vz, theta, phi,
+		       rnd, r_spread_corsika, theta_spread_corsika, R0_corsika, n0_corsika);
 	if(getIntersection( x1_int, y1_int, z1_int, t1_int,
 			    x2_int, y2_int, z2_int, t2_int,
 			    x0, y0, z0, vx, vy, vz)>1){
@@ -150,6 +166,58 @@ Double_t getDistToTerzinaOfIntersection(Double_t x_int, Double_t y_int, Double_t
   return v.Mag();
 }
 */
+
+bool gen_uniform_filled_circle_2D(Double_t &x0_in, Double_t &y0_in, Double_t r_spread, TRandom3 *rnd){
+  Double_t r_sq;
+  Double_t r_spread_sq = r_spread*r_spread;
+  while(1){
+    x0_in = rnd->Uniform(-r_spread,r_spread);
+    y0_in = rnd->Uniform(-r_spread,r_spread);
+    r_sq = x0_in*x0_in + y0_in*y0_in;
+    if(r_sq<=r_spread_sq)
+      return true;
+  }
+  return false;
+}
+
+void genTrk_corsika(Double_t &x0, Double_t &y0, Double_t &z0, Double_t &vx, Double_t &vy, Double_t &vz, Double_t &theta, Double_t &phi,
+		    TRandom3 *rnd, Double_t r_spread, Double_t theta_spread, TVector3 *R0, TVector3 *n0){
+  //////////////////////
+  Double_t x0_in;
+  Double_t y0_in;
+  gen_uniform_filled_circle_2D(x0_in, y0_in, r_spread, rnd);
+  Double_t z0_in = 0;
+  //////////////////////
+  TVector3 r0( x0_in, y0_in, z0_in);  
+  r0.RotateY(n0->Theta());
+  x0 = r0.X() + R0->X();
+  y0 = r0.Y() + R0->Y();
+  z0 = r0.Z() + R0->Z();
+  //////////////////////
+  Double_t theta_in = TMath::ACos(rnd->Uniform(TMath::Cos(theta_spread),1.0));
+  Double_t phi_in = rnd->Uniform(0.0,TMath::TwoPi());
+  TVector3 v_v_in;
+  v_v_in.SetMagThetaPhi(track_speed,theta_in,phi_in);
+  v_v_in.RotateY(-TMath::Pi()+n0->Theta());
+  //
+  vx = v_v_in.X();
+  vy = v_v_in.Y();
+  vz = v_v_in.Z();
+  theta = v_v_in.Theta();
+  phi = v_v_in.Phi();  
+  /*      
+  Double_t theta_r0 = TMath::ACos(rnd->Uniform(cos_min_generation,1.0));
+  Double_t phi_r0   = rnd->Uniform(0.0,TMath::TwoPi());
+  TVector3 v_r0;
+  v_r0.SetMagThetaPhi(generationH_from_c,theta_r0,phi_r0);
+  x0 = v_r0.x();
+  y0 = v_r0.y();
+  z0 = v_r0.z();
+  vx = v_v.x();
+  vy = v_v.y();
+  vz = v_v.z();
+  */
+}
 
 void genTrk(Double_t &x0, Double_t &y0, Double_t &z0, Double_t &vx, Double_t &vy, Double_t &vz, Double_t &theta, Double_t &phi, TRandom3 *rnd){
   //

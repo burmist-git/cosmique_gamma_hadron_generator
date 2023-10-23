@@ -155,16 +155,16 @@ void cpv::Loop(TString histOut){
     Double_t r_from_tel = TMath::Sqrt((x0_LST01 - x1_int)*(x0_LST01 - x1_int) + (y0_LST01 - y1_int)*(y0_LST01 - y1_int));
     //
     ///////////
-    if(theta_p_t_deg<3.0){
-      if(r_from_tel<=0.3){
+    if(theta_p_t_deg<2.0){
+      if(r_from_tel<=0.20){
 	h1_theta_deg_cut->Fill(theta_deg);
 	h1_phi_deg_cut->Fill(phi_deg);
 	h1_x0_cut->Fill(x0);
 	h1_y0_cut->Fill(y0);
 	h1_z0_cut->Fill(z0);
 	//
-	h1_x1_int_cut->Fill(x1_int,1.0/2815.0);
-	h1_y1_int_cut->Fill(y1_int,1.0/2815.0);
+	h1_x1_int_cut->Fill(x1_int);
+	h1_y1_int_cut->Fill(y1_int);
 	//
 	h2_y1_int_vs_x1_int_cut->Fill(x1_int,y1_int);
 	//
