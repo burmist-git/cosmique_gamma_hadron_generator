@@ -94,7 +94,7 @@ void cpv::Loop(TString histOut){
   Long64_t nentries = fChain->GetEntriesFast();
   cout<<"nentries = "<<nentries<<endl;
   Long64_t nbytes = 0, nb = 0;
-  TVector3 v_det(1.0*TMath::Sin(20.0/180.0*TMath::Pi()),0,1.0*TMath::Cos(20.0/180.0*TMath::Pi()));
+  TVector3 v_det(1.0*TMath::Sin(20.0/180.0*TMath::Pi()),0.0,1.0*TMath::Cos(20.0/180.0*TMath::Pi()));
   ////////
   //
   evstHist *evH = new evstHist("evH","evH",
