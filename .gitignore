@@ -2,6 +2,6 @@
 *.pdf
 *.eps
 obj
-*.root
 cosmique_gamma_hadron_generator
 runcpv
+cosmique_gamma_hadron_generator_corsika.root
