@@ -5,3 +5,11 @@ obj
 cosmique_gamma_hadron_generator
 runcpv
 cosmique_gamma_hadron_generator_corsika.root
+cosmique_gamma_hadron_generator.root
+cosmique_gamma_hadron_generator_h1km.root
+cosmique_gamma_hadron_generator_h200km.root
+hist.root
+hist1km.root
+hist_corsika.root
+hist_cosmique_gamma_hadron_generator.root
+hist_one.root
