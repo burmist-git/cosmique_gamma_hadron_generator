@@ -51,21 +51,19 @@ void cpv::Loop(TString histOut){
   gr2D_gen->SetNameTitle("gr2D_gen","gr2D_gen");
   //
   TH1D *h1_theta = new TH1D("h1_theta","h1_theta",1000,0.0,2*TMath::Pi());
-  TH1D *h1_phi = new TH1D("h1_phi","h1_phi",1000,0.0,2*TMath::Pi());
+  TH1D *h1_phi   = new TH1D("h1_phi","h1_phi",1000,0.0,2*TMath::Pi());
   TH1D *h1_theta_deg = new TH1D("h1_theta_deg","h1_theta_deg",10000,0.0,181.0);
-  TH1D *h1_phi_deg = new TH1D("h1_phi_deg","h1_phi_deg",1000,0.0,360.0);
-  //
-  TH1D *h1_theta_deg_cut = new TH1D("h1_theta_deg_cut","h1_theta_deg_cut",10000,0.0,181.0);
-  TH1D *h1_phi_deg_cut = new TH1D("h1_phi_deg_cut","h1_phi_deg_cut",1000,0.0,360.0);
-  //
+  TH1D *h1_phi_deg   = new TH1D("h1_phi_deg","h1_phi_deg",10000,-360.0,360.0);
   TH1D *h1_theta_p_t = new TH1D("h1_theta_p_t","h1_theta_p_t",1000,0.0,2*TMath::Pi());
   TH1D *h1_theta_p_t_deg = new TH1D("h1_theta_p_t_deg","h1_theta_p_t_deg",1000,0.0,181);
   //
-  TH1D *h1_theta_p_t_deg_cut = new TH1D("h1_theta_p_t_deg_cut","h1_theta_p_t_deg_cut",val_N_bins_t,val_Thetamin,val_Thetamax);
-  //
-  //
   TH1D *h1_azimuth_deg = new TH1D("h1_azimuth_deg","h1_azimuth_deg",400,0.0,360);
   TH1D *h1_altitude_deg = new TH1D("h1_altitude_deg","h1_altitude_deg",400,0.0,180);
+  //
+  TH1D *h1_theta_deg_cut = new TH1D("h1_theta_deg_cut","h1_theta_deg_cut",10000,0.0,181.0);
+  TH1D *h1_phi_deg_cut = new TH1D("h1_phi_deg_cut","h1_phi_deg_cut",10000,-360.0,360.0);
+  TH1D *h1_theta_p_t_deg_cut = new TH1D("h1_theta_p_t_deg_cut","h1_theta_p_t_deg_cut",val_N_bins_t,val_Thetamin,val_Thetamax);
+  //
   //
   Double_t theta_deg;
   Double_t phi_deg;
@@ -104,6 +102,7 @@ void cpv::Loop(TString histOut){
   ////////
   //evH->Draw_hist("evH.pdf");
   ////////
+  Int_t nnpoints = 0;
   Int_t ngr2_points = 0;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
     Long64_t ientry = LoadTree(jentry);
@@ -119,10 +118,10 @@ void cpv::Loop(TString histOut){
     }
     //
     theta_deg = theta*180.0/TMath::Pi();
-    phi_deg = phi*180.0/TMath::Pi();
+    phi_deg = conv_phi(phi)*180.0/TMath::Pi();
     //
     h1_theta->Fill(theta);
-    h1_phi->Fill(phi);
+    h1_phi->Fill(conv_phi(phi));
     //
     h1_theta_deg->Fill(theta_deg);
     h1_phi_deg->Fill(phi_deg);
@@ -143,10 +142,10 @@ void cpv::Loop(TString histOut){
     h2_y1_int_vs_x1_int->Fill(x1_int,y1_int);
     //
     TVector3 v_prot_azimuth_alt;
-    v_prot_azimuth_alt.SetMagThetaPhi(1.0,theta,phi);
+    v_prot_azimuth_alt.SetMagThetaPhi(1.0,theta,conv_phi(phi));
     TVector3 v_prot_azimuth_alt_inv(-v_prot_azimuth_alt.x(),-v_prot_azimuth_alt.y(),-v_prot_azimuth_alt.z());
     //azimuth_deg = v_prot_azimuth_alt_inv.Phi()*180/TMath::Pi();
-    azimuth_deg = phi*180/TMath::Pi();
+    azimuth_deg = conv_phi(phi)*180/TMath::Pi();
     altitude_deg = 90.0 - v_prot_azimuth_alt_inv.Theta()*180/TMath::Pi();
     ///////////
     //
@@ -155,8 +154,11 @@ void cpv::Loop(TString histOut){
     Double_t r_from_tel = TMath::Sqrt((x0_LST01 - x1_int)*(x0_LST01 - x1_int) + (y0_LST01 - y1_int)*(y0_LST01 - y1_int));
     //
     ///////////
-    if(theta_p_t_deg<2.0){
-      if(r_from_tel<=0.20){
+    if(theta_p_t_deg<10.0){
+      //if(theta_p_t_deg<3.0){
+      //if(r_from_tel<=0.15){
+      //if(nnpoints<4492){
+      //for(Int_t iii = 0; iii<49; iii++){
 	h1_theta_deg_cut->Fill(theta_deg);
 	h1_phi_deg_cut->Fill(phi_deg);
 	h1_x0_cut->Fill(x0);
@@ -168,11 +170,15 @@ void cpv::Loop(TString histOut){
 	//
 	h2_y1_int_vs_x1_int_cut->Fill(x1_int,y1_int);
 	//
+	h1_theta_p_t_deg_cut->Fill(theta_p_t_deg);
+	//
 	h1_azimuth_deg->Fill(azimuth_deg);
 	h1_altitude_deg->Fill(altitude_deg);
 	//
-	h1_theta_p_t_deg_cut->Fill(theta_p_t_deg);
-      }
+	nnpoints++;
+	//}
+	//}
+	//}
     }
   }
   //
@@ -300,4 +306,10 @@ Double_t cpv::get_tot_flux(Double_t e_min, Double_t e_max){
 
 Double_t cpv::get_surface_fluxs(Double_t r_in_m, Double_t theta){
   return 2.0*TMath::Pi()*r_in_m*r_in_m*(1-TMath::Cos(theta));
+}
+
+Double_t cpv::conv_phi(Double_t phiv){
+  if(phiv<0)
+    return 2.0*TMath::Pi()+phiv;
+  return phiv;
 }

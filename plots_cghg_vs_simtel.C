@@ -9,16 +9,19 @@
 
 #include <time.h>
 
-void norm_hist( TH1D *h1, TH1D *h1_n);
+void norm_hist( TH1D *h1, TH1D *h1_n, bool if_norn_error = false);
 
 Int_t plots_cghg_vs_simtel(){
 
   TString fileN01;
   TString fileN02;
   //fileN01 = "./hist.root";
-  fileN01 = "./hist1km.root";
-  //fileN02 = "../pyeventio_example/hist_fast_proton_nsb_1x_33837ev.root";
-  fileN02 = "../pyeventio_example/hist_fast_proton_nsb_1x.root";
+  //fileN01 = "./hist120km.root";
+  fileN01 = "./hist120km_cut_28427ev.root";
+  fileN02 = "../pyeventio_example/hist_fast_proton_nsb_1x_10172_ev.root";
+  //fileN01 = "./hist120km.root";
+  //fileN02 = "../pyeventio_example/hist_fast_proton_nsb_1x.root";
+  //fileN02 = "../pyeventio_example/hist_fast_proton_nsb_1x.root";
   TFile *f01 = new TFile(fileN01.Data());
   TFile *f02 = new TFile(fileN02.Data());
   //
@@ -50,13 +53,13 @@ Int_t plots_cghg_vs_simtel(){
   h1_01_al_n->SetNameTitle("h1_01_al_n","h1_01_al_n");
   h1_02_al_n->SetNameTitle("h1_02_al_n","h1_02_al_n");
   norm_hist(h1_01_x,h1_01_x_n);
-  norm_hist(h1_02_x,h1_02_x_n);
+  norm_hist(h1_02_x,h1_02_x_n,true);
   norm_hist(h1_01_y,h1_01_y_n);
-  norm_hist(h1_02_y,h1_02_y_n);
+  norm_hist(h1_02_y,h1_02_y_n,true);
   norm_hist(h1_01_az,h1_01_az_n);
-  norm_hist(h1_02_az,h1_02_az_n);
+  norm_hist(h1_02_az,h1_02_az_n,true);
   norm_hist(h1_01_al,h1_01_al_n);
-  norm_hist(h1_02_al,h1_02_al_n);
+  norm_hist(h1_02_al,h1_02_al_n,true);
   //
   //  
   h1_01_x->SetLineColor(kBlack);
@@ -70,6 +73,7 @@ Int_t plots_cghg_vs_simtel(){
   h1_02_x_n->SetLineColor(kRed);
   h1_02_x_n->SetMarkerColor(kRed);
   h1_02_x_n->SetLineWidth(3.0);
+  h1_02_x_n->SetMarkerStyle(20);
   //
   h1_01_y->SetLineColor(kBlack);
   h1_01_y->SetLineWidth(3.0);
@@ -82,6 +86,7 @@ Int_t plots_cghg_vs_simtel(){
   h1_02_y_n->SetLineColor(kRed);
   h1_02_y_n->SetMarkerColor(kRed);
   h1_02_y_n->SetLineWidth(3.0);
+  h1_02_y_n->SetMarkerStyle(20);
   //  
   h1_01_az->SetLineColor(kBlack);
   h1_01_az->SetLineWidth(3.0);
@@ -94,6 +99,7 @@ Int_t plots_cghg_vs_simtel(){
   h1_02_az_n->SetLineColor(kRed);
   h1_02_az_n->SetMarkerColor(kRed);
   h1_02_az_n->SetLineWidth(3.0);
+  h1_02_az_n->SetMarkerStyle(20);
   //  
   h1_01_al->SetLineColor(kBlack);
   h1_01_al->SetLineWidth(3.0);
@@ -106,6 +112,7 @@ Int_t plots_cghg_vs_simtel(){
   h1_02_al_n->SetLineColor(kRed);
   h1_02_al_n->SetMarkerColor(kRed);
   h1_02_al_n->SetLineWidth(3.0);
+  h1_02_al_n->SetMarkerStyle(20);
   //
   //
   TLegend *leg1 = new TLegend(0.6,0.6,0.9,0.9,"","brNDC");
@@ -117,7 +124,7 @@ Int_t plots_cghg_vs_simtel(){
   gStyle->SetFrameBorderMode(0);
   gROOT->ForceStyle();
   gStyle->SetStatColor(kWhite);
-  gStyle->SetOptStat(kFALSE);
+  //gStyle->SetOptStat(kFALSE);
   gPad->SetGridx();
   gPad->SetGridy();
   //
@@ -128,9 +135,9 @@ Int_t plots_cghg_vs_simtel(){
   //  
   h1_01_x_n->SetTitle("");
   h1_02_x_n->SetTitle("");
-  h1_02_x_n->Draw();
+  h1_01_x_n->Draw();
   h1_02_x_n->GetXaxis()->SetTitle("Core x, km");
-  h1_01_x_n->Draw("sames");
+  h1_02_x_n->Draw("sames");
   leg1->Draw("same");
   //
   //    
@@ -148,11 +155,11 @@ Int_t plots_cghg_vs_simtel(){
   c2->SetTopMargin(0.01);
   c2->SetBottomMargin(0.1);
   //
-  h1_01_y_n->SetTitle("");
-  h1_02_y_n->SetTitle("");
-  h1_02_y_n->Draw();
-  h1_02_y_n->GetXaxis()->SetTitle("Core y, km");
-  h1_01_y_n->Draw("sames");
+  h1_01_y->SetTitle("");
+  h1_02_y->SetTitle("");
+  h1_01_y->Draw();
+  h1_02_y->GetXaxis()->SetTitle("Core y, km");
+  h1_02_y->Draw("sames");
   leg1->Draw("same");
   //
   //    
@@ -161,7 +168,7 @@ Int_t plots_cghg_vs_simtel(){
   gStyle->SetFrameBorderMode(0);
   gROOT->ForceStyle();
   gStyle->SetStatColor(kWhite);
-  gStyle->SetOptStat(kFALSE);
+  //gStyle->SetOptStat(kFALSE);
   gPad->SetGridx();
   gPad->SetGridy();
   //
@@ -170,11 +177,11 @@ Int_t plots_cghg_vs_simtel(){
   c3->SetTopMargin(0.01);
   c3->SetBottomMargin(0.1);
   //  
-  h1_01_az_n->SetTitle("");
-  h1_02_az_n->SetTitle("");
-  h1_02_az_n->Draw();
-  h1_02_az_n->GetXaxis()->SetTitle("Azimuth, deg");
-  h1_01_az_n->Draw("sames");
+  h1_01_az->SetTitle("");
+  h1_02_az->SetTitle("");
+  h1_01_az->Draw();
+  h1_02_az->GetXaxis()->SetTitle("Azimuth, deg");
+  h1_02_az->Draw("sames");
   leg1->Draw("same");
   //
   //    
@@ -183,7 +190,7 @@ Int_t plots_cghg_vs_simtel(){
   gStyle->SetFrameBorderMode(0);
   gROOT->ForceStyle();
   gStyle->SetStatColor(kWhite);
-  gStyle->SetOptStat(kFALSE);
+  //gStyle->SetOptStat(kFALSE);
   gPad->SetGridx();
   gPad->SetGridy();
   //
@@ -192,15 +199,13 @@ Int_t plots_cghg_vs_simtel(){
   c4->SetTopMargin(0.01);
   c4->SetBottomMargin(0.1);
   //  
-  h1_01_al_n->SetTitle("");
-  h1_02_al_n->SetTitle("");
-  h1_02_al_n->Draw();
-  h1_02_al_n->GetXaxis()->SetTitle("Altitude, deg");
-  h1_01_al_n->Draw("sames");
+  h1_01_al->SetTitle("");
+  h1_02_al->SetTitle("");
+  h1_01_al->Draw();
+  h1_02_al->GetXaxis()->SetTitle("Altitude, deg");
+  h1_02_al->Draw("sames");
   //
   leg1->Draw("same");
-  //
-  //
   //
   //h1_01->GetXaxis()->SetTitle("Theta, deg");
   //h1_01->GetYaxis()->SetTitle("Distance to the surface, km");
@@ -217,7 +222,7 @@ Int_t plots_cghg_vs_simtel(){
   return 0;
 }
 
-void norm_hist( TH1D *h1, TH1D *h1_n){
+void norm_hist( TH1D *h1, TH1D *h1_n, bool if_norn_error){
   Int_t nBins = h1->GetNbinsX();
   Double_t xl = h1->GetBinLowEdge(1);
   Double_t xr = h1->GetBinLowEdge(nBins) + h1->GetBinWidth(nBins);
@@ -229,6 +234,8 @@ void norm_hist( TH1D *h1, TH1D *h1_n){
   if(norm>0.0){
     for(Int_t i = 1;i<=nBins;i++){
       h1_n->SetBinContent(i,h1->GetBinContent(i)/norm);
+      if(if_norn_error)
+	h1_n->SetBinError(i,h1->GetBinError(i)/norm);
     }
   }
 }

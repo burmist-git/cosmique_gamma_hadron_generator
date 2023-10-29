@@ -40,6 +40,8 @@ public:
   void printTrkInfo( Int_t eventIDmy, double nphotons_per_m2);
   void saveTrkInfoAndPhotonDencity( Int_t eventIDmy, Double_t nphotons_per_m2);
   //
+  Double_t conv_phi(Double_t phiv);
+  //
   Double_t get_tot_flux(Double_t e_min, Double_t e_max);
   Double_t get_surface_fluxs(Double_t r_in_m, Double_t theta);
 };
