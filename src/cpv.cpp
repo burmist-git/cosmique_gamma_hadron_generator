@@ -155,30 +155,30 @@ void cpv::Loop(TString histOut){
     //
     ///////////
     if(theta_p_t_deg<10.0){
-      //if(theta_p_t_deg<3.0){
-      //if(r_from_tel<=0.15){
-      //if(nnpoints<4492){
-      //for(Int_t iii = 0; iii<49; iii++){
-	h1_theta_deg_cut->Fill(theta_deg);
-	h1_phi_deg_cut->Fill(phi_deg);
-	h1_x0_cut->Fill(x0);
-	h1_y0_cut->Fill(y0);
-	h1_z0_cut->Fill(z0);
-	//
-	h1_x1_int_cut->Fill(x1_int);
-	h1_y1_int_cut->Fill(y1_int);
-	//
-	h2_y1_int_vs_x1_int_cut->Fill(x1_int,y1_int);
-	//
-	h1_theta_p_t_deg_cut->Fill(theta_p_t_deg);
-	//
-	h1_azimuth_deg->Fill(azimuth_deg);
-	h1_altitude_deg->Fill(altitude_deg);
-	//
-	nnpoints++;
-	//}
-	//}
-	//}
+      if(theta_p_t_deg<3.0){
+	if(r_from_tel<=0.15){
+	  //if(nnpoints<4492){
+	  //for(Int_t iii = 0; iii<49; iii++){
+	  h1_theta_deg_cut->Fill(theta_deg);
+	  h1_phi_deg_cut->Fill(phi_deg);
+	  h1_x0_cut->Fill(x0);
+	  h1_y0_cut->Fill(y0);
+	  h1_z0_cut->Fill(z0);
+	  //
+	  h1_x1_int_cut->Fill(x1_int);
+	  h1_y1_int_cut->Fill(y1_int);
+	  //
+	  h2_y1_int_vs_x1_int_cut->Fill(x1_int,y1_int);
+	  //
+	  h1_theta_p_t_deg_cut->Fill(theta_p_t_deg);
+	  //
+	  h1_azimuth_deg->Fill(azimuth_deg);
+	  h1_altitude_deg->Fill(altitude_deg);
+	  //
+	  nnpoints++;
+	  //}
+	}
+      }
     }
   }
   //
