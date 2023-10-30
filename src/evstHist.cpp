@@ -266,3 +266,40 @@ const void evstHist::PrintBinsInfo(const TH1D *h1){
     std::cout<<bin_l<<"   "<<bin_r<<std::endl;
   }
 }
+
+Double_t evstHist::GetTotIntegral(){
+  Double_t integral_v = 0.0;
+  for(Int_t ii = 1;ii<=(_N_bins_E*_N_bins_t);ii++)
+    integral_v+=GetBinContent(ii);
+  return integral_v;
+}
+
+Double_t evstHist::GetIntegral(Double_t e_min, Double_t e_max, Double_t theta_min, Double_t theta_max) const {
+  Double_t integral_v = 0.0;
+  Int_t i_cell;
+  //
+  Double_t e_min_bin;
+  Double_t e_max_bin;
+  Double_t theta_min_bin;
+  Double_t theta_max_bin;
+  //
+  for(Int_t i_theta = 0;i_theta<_N_bins_t;i_theta++){
+    for(Int_t i_E = 0;i_E<_N_bins_E;i_E++){
+      i_cell = (i_E)*_N_bins_t+(i_theta+1);
+      //
+      e_min_bin = _h1_E->GetBinLowEdge(i_E+1);
+      e_max_bin = _h1_E->GetBinLowEdge(i_E+1) + _h1_E->GetBinWidth(i_E+1);
+      //
+      theta_min_bin = _h1_theta->GetBinLowEdge(i_theta+1);
+      theta_max_bin = _h1_theta->GetBinLowEdge(i_theta+1) + _h1_theta->GetBinWidth(i_theta+1);
+      //
+      if(e_min_bin>=e_min && e_max_bin<=e_max){
+	if(theta_min_bin>=theta_min && theta_max_bin<=theta_max){
+	  //cout<<"i_cell = "<<i_cell<<endl;
+	  integral_v+=GetBinContent(i_cell);
+	}
+      }
+    }
+  }
+  return integral_v;
+}

@@ -9,21 +9,38 @@
 
 #include <time.h>
 
-void norm_hist( TH1D *h1, TH1D *h1_n, bool if_norn_error = false);
+void norm_hist( TH1D *h1, TH1D *h1_n, Double_t val);
 
-Int_t plots_cghg_vs_simtel(){
+Int_t plots_cghg_vs_simtel_full(){
 
   TString fileN01;
   TString fileN02;
-  //fileN01 = "./hist.root";
-  //fileN01 = "./hist120km.root";
-  //fileN01 = "./hist120km_cut_28427ev.root";
-  //fileN02 = "../pyeventio_example/hist_fast_proton_nsb_1x_10172_ev.root";
-  fileN01 = "./hist120km_cut_376521ev.root";
-  fileN02 = "../pyeventio_example/hist_fast_proton_nsb_1x_10172_ev.root";
-  //fileN01 = "./hist120km.root";
-  //fileN02 = "../pyeventio_example/hist_fast_proton_nsb_1x.root";
-  //fileN02 = "../pyeventio_example/hist_fast_proton_nsb_1x.root";
+  //
+  Double_t Ratio = 10172.0/376521.0;
+  Double_t e_stat_corr = (1.0/3981.07 - 1.0/100000.0)/(1.0/10.0 - 1.0/100000.0);
+  Double_t ntot_simtel = 112643300.0;
+  Double_t ntot_fast_sim = 486520750.0;
+  Double_t ntot_fast_sim_corr = ntot_fast_sim/e_stat_corr*Ratio;
+  Double_t stat_corr = ntot_fast_sim_corr/ntot_fast_sim;
+  //
+  //Double_t Ratio = 10172.0/28427.0;
+  //Double_t e_stat_corr = (1.0/3981.07 - 1.0/100000.0)/(1.0/10.0 - 1.0/100000.0);
+  //Double_t ntot_simtel = 112643300.0;
+  //Double_t ntot_fast_sim = 36890033.0;
+  //Double_t ntot_fast_sim_corr = ntot_fast_sim/e_stat_corr*Ratio;
+  //Double_t stat_corr = ntot_fast_sim_corr/ntot_fast_sim;
+  //
+  cout<<"Ratio              "<<Ratio<<endl
+      <<"e_stat_corr        "<<e_stat_corr<<endl
+      <<"ntot_simtel        "<<ntot_simtel<<endl
+      <<"ntot_fast_sim      "<<ntot_fast_sim<<endl
+      <<"ntot_fast_sim_corr "<<ntot_fast_sim_corr<<endl
+      <<"stat_corr          "<<stat_corr<<endl;
+  //
+  //
+  //
+  fileN01 = "./hist120km_486520750ev.root";
+  fileN02 = "../pyeventio_example/hist_fast_proton_nsb_1x.root";
   TFile *f01 = new TFile(fileN01.Data());
   TFile *f02 = new TFile(fileN02.Data());
   //
@@ -54,14 +71,14 @@ Int_t plots_cghg_vs_simtel(){
   h1_02_az_n->SetNameTitle("h1_02_az_n","h1_02_az_n");
   h1_01_al_n->SetNameTitle("h1_01_al_n","h1_01_al_n");
   h1_02_al_n->SetNameTitle("h1_02_al_n","h1_02_al_n");
-  norm_hist(h1_01_x,h1_01_x_n);
-  norm_hist(h1_02_x,h1_02_x_n,true);
-  norm_hist(h1_01_y,h1_01_y_n);
-  norm_hist(h1_02_y,h1_02_y_n,true);
-  norm_hist(h1_01_az,h1_01_az_n);
-  norm_hist(h1_02_az,h1_02_az_n,true);
-  norm_hist(h1_01_al,h1_01_al_n);
-  norm_hist(h1_02_al,h1_02_al_n,true);
+  norm_hist(h1_01_x,h1_01_x_n, stat_corr);
+  norm_hist(h1_02_x,h1_02_x_n, 1.0);
+  norm_hist(h1_01_y,h1_01_y_n, stat_corr);
+  norm_hist(h1_02_y,h1_02_y_n,1.0);
+  norm_hist(h1_01_az,h1_01_az_n, stat_corr);
+  norm_hist(h1_02_az,h1_02_az_n,1.0);
+  norm_hist(h1_01_al,h1_01_al_n, stat_corr);
+  norm_hist(h1_02_al,h1_02_al_n,1.0);
   //
   //  
   h1_01_x->SetLineColor(kBlack);
@@ -149,9 +166,9 @@ Int_t plots_cghg_vs_simtel(){
   //  
   h1_01_x_n->SetTitle("");
   h1_02_x_n->SetTitle("");
-  h1_02_x_n->Draw();
-  h1_02_x_n->GetXaxis()->SetTitle("Core x, km");
-  h1_01_x_n->Draw("sames");
+  h1_01_x_n->Draw();
+  h1_01_x_n->GetXaxis()->SetTitle("Core x, km");
+  h1_02_x_n->Draw("sames");
   leg1->Draw("same");
   //
   //    
@@ -160,7 +177,7 @@ Int_t plots_cghg_vs_simtel(){
   gStyle->SetFrameBorderMode(0);
   gROOT->ForceStyle();
   gStyle->SetStatColor(kWhite);
-  gStyle->SetOptStat(kFALSE);
+  //gStyle->SetOptStat(kFALSE);
   gPad->SetGridx();
   gPad->SetGridy();
   //
@@ -193,9 +210,9 @@ Int_t plots_cghg_vs_simtel(){
   //  
   h1_01_az_n->SetTitle("");
   h1_02_az_n->SetTitle("");
-  h1_02_az_n->Draw();
-  h1_02_az_n->GetXaxis()->SetTitle("Azimuth, deg");
-  h1_01_az_n->Draw("sames");
+  h1_01_az_n->Draw();
+  h1_01_az_n->GetXaxis()->SetTitle("Azimuth, deg");
+  h1_02_az_n->Draw("sames");
   leg3->Draw("same");
   //
   //    
@@ -215,9 +232,9 @@ Int_t plots_cghg_vs_simtel(){
   //  
   h1_01_al_n->SetTitle("");
   h1_02_al_n->SetTitle("");
-  h1_02_al_n->Draw();
-  h1_02_al_n->GetXaxis()->SetTitle("Altitude, deg");
-  h1_01_al_n->Draw("sames");
+  h1_01_al_n->Draw();
+  h1_01_al_n->GetXaxis()->SetTitle("Altitude, deg");
+  h1_02_al_n->Draw("sames");
   //
   leg4->Draw("same");
   //
@@ -236,7 +253,7 @@ Int_t plots_cghg_vs_simtel(){
   return 0;
 }
 
-void norm_hist( TH1D *h1, TH1D *h1_n, bool if_norn_error){
+void norm_hist( TH1D *h1, TH1D *h1_n, Double_t val){
   Int_t nBins = h1->GetNbinsX();
   Double_t xl = h1->GetBinLowEdge(1);
   Double_t xr = h1->GetBinLowEdge(nBins) + h1->GetBinWidth(nBins);
@@ -245,11 +262,7 @@ void norm_hist( TH1D *h1, TH1D *h1_n, bool if_norn_error){
       <<"xl    "<<xl<<endl
       <<"xr    "<<xr<<endl;
   h1_n->SetBins(nBins, xl, xr);
-  if(norm>0.0){
-    for(Int_t i = 1;i<=nBins;i++){
-      h1_n->SetBinContent(i,h1->GetBinContent(i)/norm);
-      if(if_norn_error)
-	h1_n->SetBinError(i,h1->GetBinError(i)/norm);
-    }
-  }
+  for(Int_t i = 1;i<=nBins;i++)
+    h1_n->SetBinContent(i,h1->GetBinContent(i)*val);
 }
+  

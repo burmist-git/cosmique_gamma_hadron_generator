@@ -98,6 +98,12 @@ void cpv::Loop(TString histOut){
   evstHist *evH = new evstHist("evH","evH",
 			       val_Emin, val_Emax, val_N_bins_E,
 			       val_Thetamin, val_Thetamax, val_N_bins_t);
+  evstHist *evH_integral = new evstHist("evH_integral","evH_integral",
+					val_Emin, val_Emax, val_N_bins_E,
+					val_Thetamin, val_Thetamax, val_N_bins_t);
+  evstHist *evH_simtel_all = new evstHist("evH_simtel_all","evH_simtel_all",
+					  val_Emin, val_Emax, val_N_bins_E,
+					  val_Thetamin, val_Thetamax, val_N_bins_t);
   //evH->test();
   ////////
   //evH->Draw_hist("evH.pdf");
@@ -155,30 +161,30 @@ void cpv::Loop(TString histOut){
     //
     ///////////
     if(theta_p_t_deg<10.0){
-      if(theta_p_t_deg<3.0){
-	if(r_from_tel<=0.15){
-	  //if(nnpoints<4492){
-	  //for(Int_t iii = 0; iii<49; iii++){
-	  h1_theta_deg_cut->Fill(theta_deg);
-	  h1_phi_deg_cut->Fill(phi_deg);
-	  h1_x0_cut->Fill(x0);
-	  h1_y0_cut->Fill(y0);
-	  h1_z0_cut->Fill(z0);
-	  //
-	  h1_x1_int_cut->Fill(x1_int);
-	  h1_y1_int_cut->Fill(y1_int);
-	  //
-	  h2_y1_int_vs_x1_int_cut->Fill(x1_int,y1_int);
-	  //
-	  h1_theta_p_t_deg_cut->Fill(theta_p_t_deg);
-	  //
-	  h1_azimuth_deg->Fill(azimuth_deg);
-	  h1_altitude_deg->Fill(altitude_deg);
-	  //
-	  nnpoints++;
-	  //}
-	}
-      }
+      //if(theta_p_t_deg<3.0){
+      //if(r_from_tel<=0.15){
+      //if(nnpoints<4492){
+      //for(Int_t iii = 0; iii<49; iii++){
+      h1_theta_deg_cut->Fill(theta_deg);
+      h1_phi_deg_cut->Fill(phi_deg);
+      h1_x0_cut->Fill(x0);
+      h1_y0_cut->Fill(y0);
+      h1_z0_cut->Fill(z0);
+      //
+      h1_x1_int_cut->Fill(x1_int);
+      h1_y1_int_cut->Fill(y1_int);
+      //
+      h2_y1_int_vs_x1_int_cut->Fill(x1_int,y1_int);
+      //
+      h1_theta_p_t_deg_cut->Fill(theta_p_t_deg);
+      //
+      h1_azimuth_deg->Fill(azimuth_deg);
+      h1_altitude_deg->Fill(altitude_deg);
+      //
+      nnpoints++;
+      //}
+      //}
+      //}
     }
   }
   //
@@ -197,23 +203,45 @@ void cpv::Loop(TString histOut){
   //
   //
   Double_t nev_theta;
-  Double_t Ntot = 10*1000000000.0*501.0;
+
+  // sphere 200 km
+  //Double_t Ntot = 10*1000000000.0*501.0;
+  //const Double_t earthR = 6371000;                          // m
+  //const Double_t generationH = 200000;                      // m
+  //const Double_t generationH_from_c = earthR + generationH; // m
+  //const Double_t theta_generation = 15.0/180.0*TMath::Pi();
+  //const Double_t ellipse_A_r = 1732.1;
+  //const Double_t ellipse_B_r = 1500.0;
+  //const Double_t solid_angle = 4*TMath::Pi();
+
+  //corsica 120 km
+  Double_t Ntot = 1000000000.0*38.0;
   const Double_t earthR = 6371000;                          // m
-  const Double_t generationH = 200000;                      // m
+  const Double_t generationH = 120000;                      // m
   const Double_t generationH_from_c = earthR + generationH; // m
-  const Double_t theta_generation = 15.0/180.0*TMath::Pi();
+  const Double_t theta_generation = 15.0/180.0*TMath::Pi(); // 33.6539 + 1.5
   const Double_t ellipse_A_r = 1732.1;
   const Double_t ellipse_B_r = 1500.0;
+  const Double_t solid_angle = 2*TMath::Pi()*(1.0-TMath::Cos(theta_generation));
+  
   const Double_t effective_area = TMath::Pi()*ellipse_A_r*ellipse_B_r;
-  Double_t surfaceTotal = get_surface_fluxs(generationH_from_c, theta_generation);
+  //Double_t surfaceTotal = get_surface_fluxs(generationH_from_c, theta_generation);
+  Double_t surfaceTotal = TMath::Pi()*(33.6539+1.5)*1000*(33.6539+1.5)*1000;
   cout<<"surfaceTotal   "<<surfaceTotal<<endl
       <<"Ntot           "<<Ntot<<endl
       <<"effective_area "<<effective_area<<endl;
   //
   //
+  Double_t solid_angle_integral;
+  Double_t tot_flux_dE_perSR_simulation;
+  Double_t ntot_to_sim = 0.0;
+  //
   Int_t i_cell;
   Double_t e_min_integral;
   Double_t e_max_integral;
+  Double_t theta_min_integral;
+  Double_t theta_max_integral;
+  //
   Double_t tot_flux_dE_perM2_perS_perSR;
   Double_t tot_flux_in_the_acceptance;
   Double_t acceptance;
@@ -233,9 +261,18 @@ void cpv::Loop(TString histOut){
       e_max_integral = evH->get_E_hist()->GetBinLowEdge(i_E+1) + evH->get_E_hist()->GetBinWidth(i_E+1);
       cout<<e_min_integral<<" "<<e_max_integral<<endl;
       tot_flux_dE_perM2_perS_perSR = get_tot_flux(e_min_integral,e_max_integral);
-      tot_flux_in_the_acceptance = surfaceTotal*tot_flux_dE_perM2_perS_perSR*4*TMath::Pi()*acceptance;
+      tot_flux_in_the_acceptance = surfaceTotal*tot_flux_dE_perM2_perS_perSR*solid_angle*acceptance;
       //
       evH->SetBinContent(i_cell,tot_flux_in_the_acceptance);
+      //
+      theta_min_integral = evH->get_theta_hist()->GetBinLowEdge(i_theta+1);
+      theta_max_integral = evH->get_theta_hist()->GetBinLowEdge(i_theta+1) + evH->get_theta_hist()->GetBinWidth(i_theta+1);
+      solid_angle_integral = 2*TMath::Pi()*(TMath::Cos(theta_min_integral/180.0*TMath::Pi()) - TMath::Cos(theta_max_integral/180.0*TMath::Pi()));
+      evH_integral->SetBinContent(i_cell,tot_flux_dE_perM2_perS_perSR*solid_angle_integral*effective_area);
+      //
+      tot_flux_dE_perSR_simulation = get_tot_flux_simulation(e_min_integral,e_max_integral)*solid_angle_integral*effective_area*5.44902e+09/779133.0/0.099991;
+      ntot_to_sim = ntot_to_sim + tot_flux_dE_perSR_simulation;
+      evH_simtel_all->SetBinContent(i_cell,tot_flux_dE_perSR_simulation);
     }
   }
   //for(Int_t i = 1;i<=evH->GetNcells();i++){
@@ -247,7 +284,8 @@ void cpv::Loop(TString histOut){
   evH->SetMaximum(1.0e+9);
   evH->SetMinimum(1.0e-1);
   evH->Draw_hist("evH.pdf");
-  //evH->
+  evH_integral->Draw_hist("evH_integral.pdf");
+  evH_simtel_all->Draw_hist("evH_simtel_all.pdf");
   //
   TFile* rootFile = new TFile(histOut.Data(), "RECREATE", " Histograms", 1);
   rootFile->cd();
@@ -296,12 +334,28 @@ void cpv::Loop(TString histOut){
   //
   evH->Write();
   evH->Draw_hist("")->Write();
+  evH_integral->Write();
+  evH_integral->Draw_hist("")->Write();
+  evH_simtel_all->Draw_hist("")->Write();
+  //
   evH->DumpBinContent("flux.dat");
+  evH_simtel_all->DumpBinContent("flux_simtel_all.dat");
+  //
+  cout<<"ntot_to_sim                      "<<ntot_to_sim<<endl
+      <<"evH_simtel_all->GetTotIntegral() "<<evH_simtel_all->GetTotIntegral()<<endl
+      <<"                                 "<<evH_simtel_all->GetIntegral(val_Emin,val_Emax, val_Thetamin, val_Thetamax)<<endl
+      <<"                                 "<<evH_simtel_all->GetIntegral(10,val_Emax, val_Thetamin, val_Thetamax)<<endl
+      <<"                                 "<<evH_simtel_all->GetIntegral(10,val_Emax, val_Thetamin, val_Thetamax)/evH_simtel_all->GetIntegral(val_Emin,val_Emax, val_Thetamin, val_Thetamax)<<endl;
+  //
   rootFile->Close();
 }
 
 Double_t cpv::get_tot_flux(Double_t e_min, Double_t e_max){
   return 5781.68*(1.0/TMath::Power(e_min,1.674)-1.0/TMath::Power(e_max,1.674));
+}
+
+Double_t cpv::get_tot_flux_simulation(Double_t e_min, Double_t e_max){
+  return (1.0/TMath::Power(e_min,1.0)-1.0/TMath::Power(e_max,1.0));
 }
 
 Double_t cpv::get_surface_fluxs(Double_t r_in_m, Double_t theta){

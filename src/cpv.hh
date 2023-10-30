@@ -44,6 +44,7 @@ public:
   //
   Double_t get_tot_flux(Double_t e_min, Double_t e_max);
   Double_t get_surface_fluxs(Double_t r_in_m, Double_t theta);
+  Double_t get_tot_flux_simulation(Double_t e_min, Double_t e_max);
 };
 
 #endif

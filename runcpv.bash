@@ -4,7 +4,7 @@
 #source /opt/ebsofts/ROOT/6.20.04-foss-2019b-Python-3.7.4/bin/thisroot.sh
 
 #Analyse list of root files 
-rootFilesList="./rootFile120km.list"
+rootFilesList="./rootFile120km_short.list"
 outHistF="./hist120km.root"
 
 #Or analyse single root file 

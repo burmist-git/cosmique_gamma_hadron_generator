@@ -35,6 +35,9 @@ class evstHist: public TH2Poly {
   void DumpBinContent(TString data_out);
   void LoadBinContent(TString data_in);
 
+  Double_t GetTotIntegral();
+  Double_t GetIntegral(Double_t e_min, Double_t e_max, Double_t theta_min, Double_t theta_max) const;
+  
   static const void PrintBinsInfo(const TH1D *h1);
   
  private:
