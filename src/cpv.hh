@@ -43,8 +43,12 @@ public:
   Double_t conv_phi(Double_t phiv);
   //
   Double_t get_tot_flux(Double_t e_min, Double_t e_max);
+  Double_t get_tot_flux_gamma(Double_t e_min, Double_t e_max);
   Double_t get_surface_fluxs(Double_t r_in_m, Double_t theta);
   Double_t get_tot_flux_simulation(Double_t e_min, Double_t e_max);
+  Double_t function_log_parabola_fit_MAGIC_tel_crab_GeV(Double_t e);
+  Double_t get_tot_flux_MAGIC_tel_crab(Int_t nn, Double_t e_min, Double_t e_max);
+  //
 };
 
 #endif

@@ -2,7 +2,8 @@ Int_t plots_cpv(){
   
   TString fileN;
   TString objectName;
-  fileN = "./hist.root";
+  //fileN = "./hist.root";
+  fileN = "./hist120km_cut_28427ev.root";
   TFile *f1 = new TFile(fileN.Data());
 
   TGraph2D *gr2D_sphere = (TGraph2D*)f1->Get("gr2D_sphere");
