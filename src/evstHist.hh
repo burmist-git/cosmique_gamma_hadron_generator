@@ -22,7 +22,7 @@ class evstHist: public TH2Poly {
 	   Double_t val_Thetamin = 0.0, Double_t val_Thetamax = 10.0, Int_t val_N_bins_t = 10);
   ~evstHist();
   void test();
-  TCanvas* Draw_hist(TString fileName);
+  TCanvas* Draw_hist(TString fileName, TString frame_title="");
 
   inline TH1D* get_theta_hist() {return _h1_theta;}
   inline TH1D* get_E_hist() {return _h1_E;}

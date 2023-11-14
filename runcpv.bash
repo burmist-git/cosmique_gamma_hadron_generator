@@ -4,7 +4,7 @@
 #source /opt/ebsofts/ROOT/6.20.04-foss-2019b-Python-3.7.4/bin/thisroot.sh
 
 #Analyse list of root files 
-rootFilesList="./rootFile120km_short.list"
+rootFilesList="./rootFile120km.list"
 outHistF="./hist120km.root"
 
 #Or analyse single root file 
@@ -17,6 +17,7 @@ function printHelp {
     echo " --> ERROR in input arguments "
     echo " [0] -d  : single root file"
     echo " [0] -l  : list of root files"
+    echo " [0] -ls : list (short) of root files"
     echo " [0] -h  : print help"
 }
 
@@ -27,7 +28,9 @@ else
     if [ "$1" = "-d" ]; then
 	./runcpv 1 $inRootFiles $outHistSingleF
     elif [ "$1" = "-l" ]; then
-	./runcpv 0 $rootFilesList $outHistF
+	time ./runcpv 0 $rootFilesList $outHistF | tee log
+    elif [ "$1" = "-ls" ]; then
+	time ./runcpv 0 "./rootFile120km_short.list" $outHistF | tee log
     elif [ "$1" = "-h" ]; then
         printHelp
     else

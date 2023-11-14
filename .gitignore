@@ -14,3 +14,7 @@ hist_corsika.root
 hist_cosmique_gamma_hadron_generator.root
 hist_one.root
 hist120km.root
+log
+hist120km_cut_gamma_11987ev.root
+hist120km_gamma_2738ev.root
+hist120km_gamma_5672028ev.root

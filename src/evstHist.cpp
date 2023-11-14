@@ -147,7 +147,7 @@ void evstHist::test(){
     SetBinContent(i+1,i+1);
 };
 
-TCanvas* evstHist::Draw_hist(TString fileName){
+TCanvas* evstHist::Draw_hist(TString fileName, TString frame_title){
 
   //kDeepSea=51,          kGreyScale=52,    kDarkBodyRadiator=53,
   //kBlueYellow= 54,      kRainBow=55,      kInvertedDarkBodyRadiator=56,
@@ -188,7 +188,8 @@ TCanvas* evstHist::Draw_hist(TString fileName){
   c1->SetLogz();
   
   TH2F *frame = new TH2F("h2","h2", 40, _Thetamin, _Thetamax, 40, _Emin, _Emax);
-  frame->SetTitle("Proton rate, Hz");
+  //frame->SetTitle("Proton rate, Hz");
+  frame->SetTitle(frame_title.Data());
   frame->GetXaxis()->SetTitle("Theta, deg");
   frame->GetYaxis()->SetTitle("Energy, GeV");
   //frame->GetXaxis()->CenterTitle();

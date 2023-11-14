@@ -107,6 +107,19 @@ void cpv::Loop(TString histOut){
   evstHist *evH_simtel_all = new evstHist("evH_simtel_all","evH_simtel_all",
 					  val_Emin, val_Emax, val_N_bins_E,
 					  val_Thetamin, val_Thetamax, val_N_bins_t);
+  //
+  evstHist *evH_integral_diff_protons = new evstHist("evH_integral_diff_protons","evH_integral_diff_protons",
+						     val_Emin, val_Emax, val_N_bins_E,
+						     val_Thetamin, val_Thetamax, val_N_bins_t);
+  //
+  evstHist *evH_integral_diff_gammas = new evstHist("evH_integral_diff_gammas","evH_integral_diff_gammas",
+						     val_Emin, val_Emax, val_N_bins_E,
+						     val_Thetamin, val_Thetamax, val_N_bins_t);
+  //
+  evstHist *evH_integral_diff_ratio = new evstHist("evH_integral_diff_ratio","evH_integral_diff_ratio",
+						     val_Emin, val_Emax, val_N_bins_E,
+						     val_Thetamin, val_Thetamax, val_N_bins_t);  
+  //
   //evH->test();
   ////////
   //evH->Draw_hist("evH.pdf");
@@ -115,7 +128,7 @@ void cpv::Loop(TString histOut){
   Int_t ngr2_points = 0;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
     Long64_t ientry = LoadTree(jentry);
-    if(jentry%1000000 == 0)
+    if(jentry%10000000 == 0)
       cout<<jentry<<endl;
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
@@ -170,33 +183,33 @@ void cpv::Loop(TString histOut){
       //
       //
       ///////////
-      if(theta_p_t_deg<10.0){
+      if(theta_p_t_deg<=6.0){
  	//if(theta_p_t_deg<3.0){
 	//if(r_from_tel<=0.15){
-	if(theta_p_t_deg<2.0){
-	  if(r_from_tel<=0.07){
-	    //if(nnpoints<4492){
-	    //for(Int_t iii = 0; iii<49; iii++){
-	    h1_theta_deg_cut->Fill(theta_deg);
-	    h1_phi_deg_cut->Fill(phi_deg);
-	    h1_x0_cut->Fill(x0);
-	    h1_y0_cut->Fill(y0);
-	    h1_z0_cut->Fill(z0);
-	    //
-	    h1_x1_int_cut->Fill(x1_int);
-	    h1_y1_int_cut->Fill(y1_int);
-	    //
-	    h2_y1_int_vs_x1_int_cut->Fill(x1_int,y1_int);
-	    //
-	    h1_theta_p_t_deg_cut->Fill(theta_p_t_deg);
-	    //
-	    h1_azimuth_deg->Fill(azimuth_deg);
-	    h1_altitude_deg->Fill(altitude_deg);
-	    //
-	    nnpoints++;
-	    //}
-	  }
-	}
+	//if(theta_p_t_deg<2.0){
+	//if(r_from_tel<=0.07){
+	//if(nnpoints<4492){
+	//for(Int_t iii = 0; iii<49; iii++){
+	h1_theta_deg_cut->Fill(theta_deg);
+	h1_phi_deg_cut->Fill(phi_deg);
+	h1_x0_cut->Fill(x0);
+	h1_y0_cut->Fill(y0);
+	h1_z0_cut->Fill(z0);
+	//
+	h1_x1_int_cut->Fill(x1_int);
+	h1_y1_int_cut->Fill(y1_int);
+	//
+	h2_y1_int_vs_x1_int_cut->Fill(x1_int,y1_int);
+	//
+	h1_theta_p_t_deg_cut->Fill(theta_p_t_deg);
+	//
+	h1_azimuth_deg->Fill(azimuth_deg);
+	h1_altitude_deg->Fill(altitude_deg);
+	//
+	nnpoints++;
+	//}
+	//}
+	//}
       }
     }
   }
@@ -243,13 +256,14 @@ void cpv::Loop(TString histOut){
   const Double_t generationH = 120000;                      // m
   const Double_t generationH_from_c = earthR + generationH; // m
   const Double_t theta_generation = 15.0/180.0*TMath::Pi(); // 33.6539 + 1.5
-  const Double_t ellipse_A_r = ellipse_A_r_km/1000.0;
-  const Double_t ellipse_B_r = ellipse_B_r_km/1000.0;
+  const Double_t ellipse_A_r = ellipse_A_r_km*1000.0;
+  const Double_t ellipse_B_r = ellipse_B_r_km*1000.0;
   const Double_t solid_angle = 2*TMath::Pi()*(1.0-TMath::Cos(theta_generation));
   //  
   const Double_t effective_area = TMath::Pi()*ellipse_A_r*ellipse_B_r;
   //Double_t surfaceTotal = get_surface_fluxs(generationH_from_c, theta_generation);
   Double_t surfaceTotal = TMath::Pi()*(33.6539+1.5)*1000*(33.6539+1.5)*1000;
+  //
   cout<<"surfaceTotal   "<<surfaceTotal<<endl
       <<"Ntot           "<<Ntot<<endl
       <<"effective_area "<<effective_area<<endl;
@@ -258,6 +272,8 @@ void cpv::Loop(TString histOut){
   Double_t solid_angle_integral;
   Double_t tot_flux_dE_perSR_simulation;
   Double_t ntot_to_sim = 0.0;
+  Double_t ntot_to_sim_6degless = 0.0;
+  Double_t ntot_to_sim_6degmore = 0.0;
   //
   Int_t i_cell;
   Double_t e_min_integral;
@@ -283,7 +299,8 @@ void cpv::Loop(TString histOut){
       e_min_integral = evH->get_E_hist()->GetBinLowEdge(i_E+1);
       e_max_integral = evH->get_E_hist()->GetBinLowEdge(i_E+1) + evH->get_E_hist()->GetBinWidth(i_E+1);
       cout<<e_min_integral<<" "<<e_max_integral<<endl;
-      tot_flux_dE_perM2_perS_perSR = get_tot_flux(e_min_integral,e_max_integral);
+      //tot_flux_dE_perM2_perS_perSR = get_tot_flux(e_min_integral,e_max_integral);
+      tot_flux_dE_perM2_perS_perSR = get_tot_flux_gamma(e_min_integral,e_max_integral);
       tot_flux_in_the_acceptance = surfaceTotal*tot_flux_dE_perM2_perS_perSR*solid_angle*acceptance;
       //
       evH->SetBinContent(i_cell,tot_flux_in_the_acceptance);
@@ -293,8 +310,25 @@ void cpv::Loop(TString histOut){
       solid_angle_integral = 2*TMath::Pi()*(TMath::Cos(theta_min_integral/180.0*TMath::Pi()) - TMath::Cos(theta_max_integral/180.0*TMath::Pi()));
       evH_integral->SetBinContent(i_cell,tot_flux_dE_perM2_perS_perSR*solid_angle_integral*effective_area);
       //
-      tot_flux_dE_perSR_simulation = get_tot_flux_simulation(e_min_integral,e_max_integral)*solid_angle_integral*effective_area*5.44902e+09/779133.0/0.099991;
+      //tot_flux_dE_perSR_simulation = get_tot_flux_simulation(e_min_integral,e_max_integral)*solid_angle_integral*effective_area*5.44902e+09/779133.0/0.099991;
+      //ntot_to_sim = ntot_to_sim + tot_flux_dE_perSR_simulation;
+      //evH_simtel_all->SetBinContent(i_cell,tot_flux_dE_perSR_simulation);
+      //
+      ///////////////
+      ///////////////
+      evH_integral_diff_protons->SetBinContent(i_cell,get_tot_flux(e_min_integral,e_max_integral)*solid_angle_integral);
+      evH_integral_diff_gammas->SetBinContent(i_cell,get_tot_flux_gamma(e_min_integral,e_max_integral)*solid_angle_integral);
+      ///////////////
+      ///////////////
+      //
+      //*1.05433e+09/333646.42
+      tot_flux_dE_perSR_simulation = get_tot_flux_simulation(e_min_integral,e_max_integral)*solid_angle_integral*effective_area*43821.9;
       ntot_to_sim = ntot_to_sim + tot_flux_dE_perSR_simulation;
+      if(theta_max_integral<=6.0)
+	ntot_to_sim_6degless += tot_flux_dE_perSR_simulation;
+      else
+	ntot_to_sim_6degmore += tot_flux_dE_perSR_simulation;
+      //
       evH_simtel_all->SetBinContent(i_cell,tot_flux_dE_perSR_simulation);
     }
   }
@@ -304,11 +338,21 @@ void cpv::Loop(TString histOut){
   //}
   //evH->test();
   ////////
-  evH->SetMaximum(1.0e+9);
-  evH->SetMinimum(1.0e-1);
-  evH->Draw_hist("evH.pdf");
-  evH_integral->Draw_hist("evH_integral.pdf");
-  evH_simtel_all->Draw_hist("evH_simtel_all.pdf");
+  evH_integral_diff_ratio->SetMinimum(1.0e-5);
+  evH_integral_diff_ratio->SetMaximum(1.0e-4);
+  evH_integral_diff_ratio->Divide(evH_integral_diff_gammas, evH_integral_diff_protons);
+  evH_integral_diff_ratio->Draw_hist("evH_integral_diff_ratio.pdf");
+  ////////
+  evH->SetMaximum(1.0e+4);
+  evH->SetMinimum(1.0e-6);
+  evH->Draw_hist("evH_gamma_diff.pdf");
+  //Proton rate, Hz
+  evH_integral->SetMaximum(1.0e+4);
+  evH_integral->SetMinimum(1.0e-6);
+  evH_integral->Draw_hist("evH_integral_gamma_diff.pdf","Gamma bkg. galactic rate, Hz");
+  evH_simtel_all->SetMaximum(1.0e+10);
+  evH_simtel_all->SetMinimum(1.0e+2);
+  evH_simtel_all->Draw_hist("evH_simtel_all_gamma_diff.pdf");
   //
   TFile* rootFile = new TFile(histOut.Data(), "RECREATE", " Histograms", 1);
   rootFile->cd();
@@ -356,13 +400,14 @@ void cpv::Loop(TString histOut){
   h1_theta_p_t_deg_cut->Write();
   //
   evH->Write();
+  evH_simtel_all->Write();
   evH->Draw_hist("")->Write();
   evH_integral->Write();
   evH_integral->Draw_hist("")->Write();
   evH_simtel_all->Draw_hist("")->Write();
   //
   evH->DumpBinContent("flux.dat");
-  evH_simtel_all->DumpBinContent("flux_simtel_all.dat");
+  evH_simtel_all->DumpBinContent("flux_simtel_all_gamma_diff.dat");
   //
   cout<<"ntot_to_sim                      "<<ntot_to_sim<<endl
       <<"evH_simtel_all->GetTotIntegral() "<<evH_simtel_all->GetTotIntegral()<<endl
@@ -373,6 +418,22 @@ void cpv::Loop(TString histOut){
   cout<<"get_tot_flux(50,3000.0)                  = "<<get_tot_flux(50,3000.0)<<endl
       <<"get_tot_flux_gamma(50.0,3000.0)          = "<<get_tot_flux_gamma(50.0,3000.0)<<endl
       <<"get_tot_flux_MAGIC_tel_crab(50.0,3000.0) = "<<get_tot_flux_MAGIC_tel_crab(1000000, 50.0, 3000.0)<<endl;
+  //
+  cout<<"ntot_to_sim_6degless = "<<ntot_to_sim_6degless<<endl
+      <<"ntot_to_sim_6degmore = "<<ntot_to_sim_6degmore<<endl;
+  //
+  //
+  solid_angle_integral = 2*TMath::Pi()*(TMath::Cos(0.0/180.0*TMath::Pi()) - TMath::Cos(6.0/180.0*TMath::Pi()));
+  tot_flux_dE_perM2_perS_perSR = get_tot_flux_simulation(5.0,50000.0);
+  Double_t not_norm_tot_fluence=tot_flux_dE_perM2_perS_perSR*solid_angle_integral*effective_area;
+  Double_t norm_tot_fluence=1.05433e+09;
+  Double_t correction_tot_fluence=norm_tot_fluence/not_norm_tot_fluence;  
+  //
+  cout<<"solid_angle_integral         "<<solid_angle_integral<<endl
+      <<"tot_flux_dE_perM2_perS_perSR "<<tot_flux_dE_perM2_perS_perSR<<endl
+      <<"not_norm_tot_fluence         "<<not_norm_tot_fluence<<endl
+      <<"norm_tot_fluence             "<<norm_tot_fluence<<endl
+      <<"correction_tot_fluence       "<<correction_tot_fluence<<endl;  
   //
   rootFile->Close();
 }
@@ -389,8 +450,8 @@ Double_t cpv::function_log_parabola_fit_MAGIC_tel_crab_GeV(Double_t e){
   return 10000.0*((3.23)*1.0e-14)*TMath::Power((e/1.00000/1000.0),(-2.47 - 0.24*TMath::Log(e/1.00000/1000.0)));
 }
 
-// e_min = 50.0;
-// e_max = 3000.0;
+//e_min = 50.0;
+//e_max = 3000.0;
 Double_t cpv::get_tot_flux_MAGIC_tel_crab(Int_t nn, Double_t e_min, Double_t e_max){
   Double_t de = (e_max - e_min)/(nn-1);
   Double_t f;
