@@ -26,6 +26,8 @@
 
 using namespace std;
 
+cpvbase::cpvbase(){;}
+
 cpvbase::cpvbase(TString fileList) : fChain(0) 
 {
   ifstream indata;

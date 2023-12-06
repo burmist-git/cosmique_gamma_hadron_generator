@@ -16,6 +16,7 @@ class TProfile;
 class cpvbase {
 
 public :
+  cpvbase();
   cpvbase(TString fileList);
   cpvbase(TString inFileName, Int_t keyID);
   ~cpvbase();

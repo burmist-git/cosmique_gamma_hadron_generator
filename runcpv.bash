@@ -15,10 +15,13 @@ make -f Makefilecpv clean; make -f Makefilecpv runcpv;
 
 function printHelp {
     echo " --> ERROR in input arguments "
-    echo " [0] -d  : single root file"
-    echo " [0] -l  : list of root files"
-    echo " [0] -ls : list (short) of root files"
-    echo " [0] -h  : print help"
+    echo " [0] -d           : single root file"
+    echo " [0] -l           : list of root files"
+    echo " [0] -ls          : list (short) of root files"
+    echo " [0] -fl          : calculate fluxes"
+    echo " [0] -proton_diff : proton diff."
+    echo " [0] -gamma_diff  : gamma diff."
+    echo " [0] -h           : print help"
 }
 
 if [ $# -eq 0 ] 
@@ -31,6 +34,16 @@ else
 	time ./runcpv 0 $rootFilesList $outHistF | tee log
     elif [ "$1" = "-ls" ]; then
 	time ./runcpv 0 "./rootFile120km_short.list" $outHistF | tee log
+    elif [ "$1" = "-fl" ]; then
+	time ./runcpv 2 | tee log
+    elif [ "$1" = "-proton_diff" ]; then
+	rootFilesList="./rootFile120km.list"
+	outHistF="./hist120km_proton_diff.root"
+	time ./runcpv 3 $rootFilesList $outHistF proton_diff 100000000
+    elif [ "$1" = "-gamma_diff" ]; then
+	rootFilesList="./rootFile120km.list"
+	outHistF="./hist120km_gamma_diff.root"
+	time ./runcpv 3 $rootFilesList $outHistF gamma_diff 100000000
     elif [ "$1" = "-h" ]; then
         printHelp
     else
