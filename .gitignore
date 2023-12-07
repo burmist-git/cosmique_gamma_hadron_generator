@@ -21,3 +21,9 @@ hist120km_gamma_5672028ev.root
 hist120km_gamma_diff.root
 hist120km_proton_diff.root
 cosmique_gamma_hadron_generator_corsika_onaxis.root
+hist120km_ele_diff.root
+hist120km_ele_diff_cghg_vs_simtel.root
+hist120km_gamma.root
+hist120km_gamma_cghg_vs_simtel.root
+hist120km_gamma_diff_cghg_vs_simtel.root
+hist120km_proton_diff_cghg_vs_simtel.root
