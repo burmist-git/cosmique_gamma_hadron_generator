@@ -54,9 +54,11 @@ Int_t getIntersection(Double_t &x1_int, Double_t &y1_int, Double_t &z1_int, Doub
 		      Double_t x0, Double_t y0, Double_t z0, Double_t vx, Double_t vy, Double_t vz);
 Bool_t getLSTArea(Double_t x1_int, Double_t y1_int, Double_t ellipse_A, Double_t ellipse_B);
 ////
+////
 //Double_t getDistToEarth_andPosition(Double_t x0, Double_t y0, Double_t z0, Double_t vx, Double_t vy, Double_t vz, Double_t &xe0, Double_t &ye0, Double_t &ze0);
 //Double_t getDistToTerzinaOfIntersection(Double_t x_int, Double_t y_int, Double_t z_int);
 //Double_t getAngleBetweenTrzinaAndTrk(Double_t vx, Double_t vy, Double_t vz);
+////
 ////
 int main(int argc, char *argv[]){
   if(argc == 6 && atoi(argv[1])==0){
@@ -74,7 +76,8 @@ int main(int argc, char *argv[]){
     Double_t ellipse_A = 1732.1/1000.0;
     Double_t ellipse_B = 1500.0/1000.0;
     //
-    Double_t  theta_spread_corsika = 15.0/180.0*TMath::Pi();
+    //Double_t  theta_spread_corsika = 15.0/180.0*TMath::Pi();
+    Double_t  theta_spread_corsika = 0.0/180.0*TMath::Pi();
     Double_t  r_spread_corsika = 1.500 + TMath::Tan(theta_spread_corsika)*generationH;
     TVector3  v_generationH;
     v_generationH.SetMagThetaPhi( generationH, LST_01_n0.Theta(), LST_01_n0.Phi());

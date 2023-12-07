@@ -34,6 +34,104 @@
 using namespace std;
 
 void cpv::Loop(TString histOut,
+	       Double_t y0_LST01_km, Double_t x0_LST01_km,
+	       Int_t max_trg_ev, Double_t norm_theta_p_t_deg_max, Double_t norm_r_core_max){
+  //
+  Double_t theta_deg;
+  Double_t phi_deg;
+  Double_t theta_p_t;
+  Double_t theta_p_t_deg;
+  Double_t azimuth_deg;
+  Double_t altitude_deg;
+  Double_t r_from_tel;
+  //
+  TH1D *h1_theta_deg = new TH1D("h1_theta_deg","h1_theta_deg",10000,0.0,181.0);
+  TH1D *h1_phi_deg   = new TH1D("h1_phi_deg","h1_phi_deg",10000,-360.0,360.0);
+  TH1D *h1_theta_p_t_deg = new TH1D("h1_theta_p_t_deg","h1_theta_p_t_deg",1000,0.0,181);
+  //
+  TH1D *h1_azimuth_deg = new TH1D("h1_azimuth_deg","h1_azimuth_deg",400,0.0,360);
+  TH1D *h1_altitude_deg = new TH1D("h1_altitude_deg","h1_altitude_deg",400,0.0,180);
+  //
+  TH1D *h1_x1_int = new TH1D("h1_x1_int","h1_x1_int",200,-1.8,1.8);
+  TH1D *h1_y1_int = new TH1D("h1_y1_int","h1_y1_int",200,-1.8,1.8);
+  //
+  TH1D *h1_r_from_tel = new TH1D("h1_r_from_tel","h1_r_from_tel",1000,0.0,2.0);
+  //
+  Int_t n_trg_ev = 0;
+  //
+  Long64_t nentries = fChain->GetEntriesFast();
+  cout<<"nentries = "<<nentries<<endl;
+  Long64_t nbytes = 0, nb = 0;
+  TVector3 v_det(1.0*TMath::Sin(20.0/180.0*TMath::Pi()),0.0,1.0*TMath::Cos(20.0/180.0*TMath::Pi()));
+  ////////
+  for (Long64_t jentry=0; jentry<nentries;jentry++){
+    Long64_t ientry = LoadTree(jentry);
+    if(jentry%100000000 == 0)
+      cout<<jentry<<endl;
+    if (ientry < 0) break;
+    nb = fChain->GetEntry(jentry);   nbytes += nb;
+    //
+    theta_deg = theta*180.0/TMath::Pi();
+    phi_deg = conv_phi(phi)*180.0/TMath::Pi();
+    //
+    TVector3 v_prot(-vx,-vy,-vz);
+    theta_p_t = TMath::ACos(v_prot.Dot(v_det)/v_prot.Mag()/v_det.Mag());
+    theta_p_t_deg = theta_p_t*180/TMath::Pi();
+    if(theta_p_t_deg<=norm_theta_p_t_deg_max){
+      r_from_tel = TMath::Sqrt((x0_LST01_km - x1_int)*(x0_LST01_km - x1_int) + (y0_LST01_km - y1_int)*(y0_LST01_km - y1_int));
+      if(r_from_tel<=norm_r_core_max){
+	TVector3 v_prot_azimuth_alt;
+	v_prot_azimuth_alt.SetMagThetaPhi(1.0,theta,conv_phi(phi));
+	TVector3 v_prot_azimuth_alt_inv(-v_prot_azimuth_alt.x(),-v_prot_azimuth_alt.y(),-v_prot_azimuth_alt.z());
+	azimuth_deg = conv_phi(phi)*180/TMath::Pi();
+	altitude_deg = 90.0 - v_prot_azimuth_alt_inv.Theta()*180/TMath::Pi();
+	//
+	h1_theta_p_t_deg->Fill(theta_p_t_deg);
+	h1_theta_deg->Fill(theta_deg);
+	h1_phi_deg->Fill(phi_deg);
+	//
+	h1_azimuth_deg->Fill(azimuth_deg);
+	h1_altitude_deg->Fill(altitude_deg);
+	//
+	h1_x1_int->Fill(x1_int);
+	h1_y1_int->Fill(y1_int);
+	//
+	h1_r_from_tel->Fill(r_from_tel);
+	//
+	n_trg_ev++;
+      }
+    }
+    if(n_trg_ev>=max_trg_ev)
+      break;    
+  }
+  //
+  //
+  //
+  TFile* rootFile = new TFile(histOut.Data(), "RECREATE", " Histograms", 1);
+  rootFile->cd();
+  if (rootFile->IsZombie()){
+    cout<<"  ERROR ---> file "<<histOut.Data()<<" is zombi"<<endl;
+    assert(0);
+  }
+  else
+    cout<<"  Output Histos file ---> "<<histOut.Data()<<endl;
+  //
+  h1_theta_p_t_deg->Write();
+  h1_theta_deg->Write();
+  h1_phi_deg->Write();
+  //
+  h1_azimuth_deg->Write();
+  h1_altitude_deg->Write();
+  //
+  h1_x1_int->Write();
+  h1_y1_int->Write();
+  //
+  h1_r_from_tel->Write();
+  //
+  rootFile->Close();
+}
+
+void cpv::Loop(TString histOut,
 	       Double_t ellipse_A_r_km, Double_t ellipse_B_r_km, Double_t theta_p_t_deg_max,
 	       Double_t y0_LST01_km, Double_t x0_LST01_km,
 	       Int_t max_trg_ev,
@@ -43,6 +141,11 @@ void cpv::Loop(TString histOut,
 	       Double_t norm_Energy_max,
 	       Double_t norm_r_core_max,
 	       Double_t norm_simtel_Energy_min, Double_t norm_simtel_Energy_max, TString evH_E2_data_out){
+  //
+  if(theta_p_t_deg_max == 0.0 && norm_theta_p_t_deg_max == 0.0){
+    theta_p_t_deg_max = 0.01;
+    norm_theta_p_t_deg_max = 0.01;
+  }
   //
   Double_t norm_n_simtel_cphg = 0.0;
   //
@@ -133,8 +236,14 @@ void cpv::Loop(TString histOut,
 	//
 	h1_r_from_tel->Fill(r_from_tel);
 	//
-	evH->Fill(theta_p_t_deg, 1.1);
-	evH->Fill_rcore(theta_p_t_deg, 1.1, r_from_tel*1000);
+	if(theta_p_t_deg_max == 0.01 && norm_theta_p_t_deg_max == 0.01){
+	  evH->Fill(theta_p_t_deg+0.001, 1.1);
+	  evH->Fill_rcore(theta_p_t_deg+0.001, 1.1, r_from_tel*1000);
+	}
+	else{
+	  evH->Fill(theta_p_t_deg, 1.1);
+	  evH->Fill_rcore(theta_p_t_deg, 1.1, r_from_tel*1000);
+	}
 	//
 	n_trg_ev++;
 	//

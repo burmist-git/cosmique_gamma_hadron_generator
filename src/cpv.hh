@@ -41,6 +41,10 @@ public:
 	    Double_t norm_n_simtel, Double_t norm_theta_p_t_deg_max, Double_t norm_Energy_min, Double_t norm_Energy_max, Double_t norm_r_core_max,
 	    Double_t norm_simtel_Energy_min, Double_t norm_simtel_Energy_max, TString evH_E2_data_out);
 
+  void Loop(TString histOut,
+	    Double_t y0_LST01_km, Double_t x0_LST01_km,
+	    Int_t max_trg_ev, Double_t norm_theta_p_t_deg_max, Double_t norm_r_core_max);
+  
   void Loop(TString histOut);
   void createEASCherSim_ini( Int_t eventIDmy, Double_t theta_deg, Double_t heightAboveEarth_km);
   void create_cosmique_proton_generator_info(Int_t eventIDmy, Double_t theta_deg, Double_t phi_deg, Double_t heightAboveEarth_km);
